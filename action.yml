@@ -1,0 +1,26 @@
+name: "PR Labels Check"
+author: "Klaas Schoute"
+description: "Check if a Pull Request has valid labels"
+
+branding:
+  icon: "check-circle"
+  color: "green"
+
+inputs:
+  github-token:
+    description: The GitHub token to use
+    required: true
+  pr-number:
+    description: The Pull Request number
+    required: false
+  valid-labels:
+    description: List of labels that are valid
+    required: true
+  invalid-labels:
+    description: List of labels that are invalid
+    required: false
+    default: ""
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
