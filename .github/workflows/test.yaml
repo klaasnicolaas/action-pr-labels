@@ -1,0 +1,22 @@
+---
+name: Test
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request_target:
+    types: [opened, labeled, unlabeled, synchronize]
+
+jobs:
+  pr_labels:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v4.1.7
+      - name: Test Github Action
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-number: ${{ github.event.pull_request.number }}
+          valid-labels: >-
+            breaking-change, bug, documentation
