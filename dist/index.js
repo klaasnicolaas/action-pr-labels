@@ -34,26 +34,26 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 async function run() {
     try {
-        const token = core.getInput('token', { required: true });
+        const token = core.getInput('github-token', { required: true });
         const validLabels = core
-            .getInput('valid_labels', { required: true })
+            .getInput('valid-labels', { required: true })
             .split(',')
             .map((label) => label.trim());
         const invalidLabels = core
-            .getInput('invalid_labels')
+            .getInput('invalid-labels')
             .split(',')
             .map((label) => label.trim());
         let prNumber;
         const { context } = github;
         if (context.eventName === 'pull_request_target') {
-            prNumber = parseInt(core.getInput('pr_number', { required: true }), 10);
+            prNumber = parseInt(core.getInput('pr-number', { required: true }), 10);
         }
         else if (context.eventName === 'pull_request') {
-            const prNumberInput = core.getInput('pr_number', { required: false });
+            const prNumberInput = core.getInput('pr-number', { required: false });
             prNumber = prNumberInput ? parseInt(prNumberInput, 10) : undefined;
         }
         if (!prNumber && context.eventName === 'pull_request_target') {
-            core.setFailed('pr_number is required for pull_request_target events');
+            core.setFailed('pr-number is required for pull_request_target events');
             return;
         }
         const octokit = github.getOctokit(token);
