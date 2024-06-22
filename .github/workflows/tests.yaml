@@ -7,7 +7,7 @@ on:
 
 jobs:
   jest:
-    name: Node ${{ matrix.node-version }}
+    name: Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
