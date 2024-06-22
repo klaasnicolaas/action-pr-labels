@@ -1,5 +1,5 @@
 {
-  "name": "pr-labels-action",
+  "name": "action-pr-labels",
   "description": "Check if a Pull Request has valid labels",
   "version": "1.0.0",
   "license": "MIT",
@@ -13,12 +13,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/klaasnicolaas/pr-labels-action.git"
+    "url": "git+https://github.com/klaasnicolaas/action-pr-labels.git"
   },
   "bugs": {
-    "url": "https://github.com/klaasnicolaas/pr-labels-action/issues"
+    "url": "https://github.com/klaasnicolaas/action-pr-labels/issues"
   },
-  "homepage": "https://github.com/klaasnicolaas/pr-labels-action#readme",
+  "homepage": "https://github.com/klaasnicolaas/action-pr-labels#readme",
   "keywords": [
     "actions",
     "node",
