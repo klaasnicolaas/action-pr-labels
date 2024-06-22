@@ -19,4 +19,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           pr-number: ${{ github.event.pull_request.number }}
           valid-labels: >-
-            breaking-change, bug, documentation
+            breaking-change, bugfix, documentation, enhancement, sync,
+            refactor, performance, new-feature, maintenance, ci, dependencies
