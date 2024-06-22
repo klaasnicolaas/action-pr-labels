@@ -1,1 +1,6 @@
+# Dependency directory
 node_modules
+
+# Coverage directory used by tools
+coverage
+*.lcov
