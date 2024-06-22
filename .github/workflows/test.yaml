@@ -1,5 +1,5 @@
 ---
-name: Test
+name: PR Labels
 
 # yamllint disable-line rule:truthy
 on:
@@ -7,13 +7,13 @@ on:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
-  pr_labels:
+  valid_labels:
     name: Verify
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4.1.7
-      - name: Test Github Action
+      - name: 🏷 Verify PR has a valid label
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
