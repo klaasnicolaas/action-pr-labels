@@ -30,6 +30,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = run;
+exports.getPullRequestByNumber = getPullRequestByNumber;
+exports.validatePullRequest = validatePullRequest;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 async function run() {
@@ -122,7 +125,9 @@ async function validatePullRequest(pr, validLabels, invalidLabels) {
         core.info('Labels from this PR match the expected labels');
     }
 }
-run();
+if (!process.env.JEST_WORKER_ID) {
+    run();
+}
 
 
 /***/ }),

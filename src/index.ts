@@ -4,7 +4,7 @@ import { RestEndpointMethodTypes } from '@octokit/rest'
 
 type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   try {
     const token = core.getInput('github-token', { required: true })
     const validLabels = core
@@ -65,7 +65,7 @@ async function run(): Promise<void> {
 }
 
 // Fetch pull request details
-async function getPullRequestByNumber(
+export async function getPullRequestByNumber(
   octokit: ReturnType<typeof github.getOctokit>,
   owner: string,
   repo: string,
@@ -89,7 +89,7 @@ async function getPullRequestByNumber(
 }
 
 // Validate pull request labels
-async function validatePullRequest(
+export async function validatePullRequest(
   pr: PullRequest,
   validLabels: string[],
   invalidLabels: string[],
@@ -121,4 +121,6 @@ async function validatePullRequest(
   }
 }
 
-run()
+if (!process.env.JEST_WORKER_ID) {
+  run()
+}
