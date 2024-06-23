@@ -7,7 +7,7 @@ on:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
-  valid_labels:
+  validate:
     name: Verify
     runs-on: ubuntu-latest
     steps:
