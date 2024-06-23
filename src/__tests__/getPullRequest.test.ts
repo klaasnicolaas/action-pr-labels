@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { getPullRequestByNumber } from '../src/index'
+import { getPullRequestByNumber } from '../index'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -26,17 +26,25 @@ describe('GitHub Action - getPullRequestByNumber', () => {
     expect(pr).toEqual({ number: 1 })
   })
 
-  it('should return undefined if pull request number is undefined', async () => {
+  it('should handle error when fetching pull request', async () => {
+    const mockOctokit = {
+      rest: {
+        pulls: {
+          get: jest.fn().mockRejectedValue(new Error('API Error')),
+        },
+      },
+    }
+
     const pr = await getPullRequestByNumber(
-      {} as any,
+      mockOctokit as any,
       'owner',
       'repo',
-      undefined,
+      1,
     )
 
     expect(pr).toBeUndefined()
     expect(mockCore.error).toHaveBeenCalledWith(
-      'Error fetching pull request #undefined: Error: Pull request number is undefined',
+      'Error fetching pull request #1: Error: API Error',
     )
   })
 })

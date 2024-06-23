@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { run } from '../src/index'
+import { run } from '../index'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -45,23 +45,6 @@ describe('GitHub Action - run', () => {
     )
     expect(mockCore.info).toHaveBeenCalledWith(
       'Invalid labels are: ["wontfix"]',
-    )
-  })
-
-  it('should fail if pr-number is required but not provided', async () => {
-    mockCore.getInput.mockImplementation((name) => {
-      if (name === 'github-token') return 'fake-token'
-      if (name === 'valid-labels') return 'bug,enhancement'
-      if (name === 'invalid-labels') return 'wontfix'
-      return ''
-    })
-
-    mockGithub.context.eventName = 'pull_request_target'
-
-    await run()
-
-    expect(mockCore.setFailed).toHaveBeenCalledWith(
-      'Error: pr-number is required for pull_request_target events',
     )
   })
 })

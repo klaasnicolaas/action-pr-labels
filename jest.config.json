@@ -4,6 +4,6 @@
   "collectCoverage": true,
   "coverageReporters": ["json", "text"],
   "collectCoverageFrom": ["src/**/*.ts"],
-  "coveragePathIgnorePatterns": ["/node_modules/", "/tests/"],
+  "coveragePathIgnorePatterns": ["/node_modules/", "/__tests__/"],
   "testPathIgnorePatterns": ["/node_modules/"]
 }
