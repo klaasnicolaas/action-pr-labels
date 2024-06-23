@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { validatePullRequest } from '../src/index'
+import { validatePullRequest } from '../index'
 import { RestEndpointMethodTypes } from '@octokit/rest'
 
 type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
