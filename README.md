@@ -45,8 +45,6 @@ jobs:
     name: Verify
     runs-on: ubuntu-latest
     steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v4
       - name: 🏷 Verify PR has a valid label
         uses: klaasnicolaas/action-pr-labels@v1
         with:
@@ -69,7 +67,6 @@ Thank you for being involved! :heart_eyes:
 ## License
 
 Distributed under the **Apache License 2.0** license. See [`LICENSE`](LICENSE) for more information.
-
 
 <!-- LINKS -->
 [codecov-shield]: https://codecov.io/gh/klaasnicolaas/action-pr-labels/branch/main/graph/badge.svg?token=ZWRTTOMS93
