@@ -10,7 +10,7 @@
     "format:check": "prettier --check src/**/*.ts",
     "format:fix": "prettier --write src/**/*.ts",
     "typing:check": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest tests"
   },
   "repository": {
     "type": "git",
