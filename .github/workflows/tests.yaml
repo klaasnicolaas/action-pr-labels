@@ -43,6 +43,12 @@ jobs:
       - name: 🧪 Display structure of job
         run: ls -R
       - name: 📦 Merge coverage reports
-        run: npx nyc merge coverage-*
+        run: |
+          folders=$(find . -maxdepth 1 -type d -name 'coverage-*')
+          mkdir -p merged-coverage
+          for folder in $folders; do
+            npx nyx merge $folder merged-coverage
+          done
+          mv merged-coverage/coverage-final.json .
       - name: 🧪 Display structure of job
         run: ls -R
