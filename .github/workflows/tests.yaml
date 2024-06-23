@@ -44,11 +44,9 @@ jobs:
         run: ls -R
       - name: 📦 Merge coverage reports
         run: |
-          folders=$(find . -maxdepth 1 -type d -name 'coverage-*')
           mkdir -p merged-coverage
-          for folder in $folders; do
-            npx nyx merge $folder merged-coverage
-          done
-          mv merged-coverage/coverage-final.json .
+          cp coverage-*/coverage-final.json merged-coverage
+          cat merged-coverage/*.json > ./coverage-final.json
+          rm -rf merged-coverage coverage-*
       - name: 🧪 Display structure of job
         run: ls -R
