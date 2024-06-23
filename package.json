@@ -7,8 +7,9 @@
   "author": "Klaas Schoute <hello@student-techlife.com>",
   "scripts": {
     "build": "tsc && ncc build",
-    "format": "prettier --write src/**/*.ts",
-    "check:types": "tsc --noEmit",
+    "format:check": "prettier --check src/**/*.ts",
+    "format:fix": "prettier --write src/**/*.ts",
+    "typing:check": "tsc --noEmit",
     "test": "jest"
   },
   "repository": {
