@@ -38,6 +38,7 @@ const github = __importStar(__nccwpck_require__(5438));
 async function run() {
     try {
         const token = core.getInput('github-token', { required: true });
+        const prNumber = parseInt(core.getInput('pr-number', { required: true }), 10);
         const validLabels = core
             .getInput('valid-labels', { required: true })
             .split(',')
@@ -46,24 +47,11 @@ async function run() {
             .getInput('invalid-labels')
             .split(',')
             .map((label) => label.trim());
-        let prNumber;
-        // Log the valid and invalid labels
+        // Log the PR number, valid and invalid labels
+        core.info(`Pull request number: ${prNumber}`);
         core.info(`Valid labels are: ${JSON.stringify(validLabels)}`);
         core.info(`Invalid labels are: ${JSON.stringify(invalidLabels)}`);
         const { context } = github;
-        if (context.eventName === 'pull_request_target') {
-            prNumber = parseInt(core.getInput('pr-number', { required: true }), 10);
-        }
-        else if (context.eventName === 'pull_request') {
-            const prNumberInput = core.getInput('pr-number', { required: false });
-            prNumber = prNumberInput ? parseInt(prNumberInput, 10) : undefined;
-        }
-        // Check if pr-number is required for pull_request_target events
-        if (!prNumber && context.eventName === 'pull_request_target') {
-            core.setFailed('Error: pr-number is required for pull_request_target events');
-            return;
-        }
-        core.info(`Pull request number: ${prNumber}`);
         const octokit = github.getOctokit(token);
         core.debug(`Fetching pull request details for PR number ${prNumber}`);
         const pr = await getPullRequestByNumber(octokit, context.repo.owner, context.repo.repo, prNumber);
@@ -87,9 +75,6 @@ async function run() {
 // Fetch pull request details
 async function getPullRequestByNumber(octokit, owner, repo, prNumber) {
     try {
-        if (prNumber === undefined) {
-            throw new Error('Pull request number is undefined');
-        }
         const { data: pr } = await octokit.rest.pulls.get({
             owner,
             repo,
