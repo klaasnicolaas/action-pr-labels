@@ -43,6 +43,6 @@ jobs:
       - name: 🧪 Display structure of job
         run: ls -R
       - name: 📦 Merge coverage reports
-        run: npx nyc merge coverage-*/coverage-final.json
+        run: npx nyc merge coverage-*
       - name: 🧪 Display structure of job
         run: ls -R
