@@ -2,7 +2,7 @@
   "name": "action-pr-labels",
   "description": "Check if a Pull Request has valid labels",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "author": "Klaas Schoute <hello@student-techlife.com>",
   "scripts": {
