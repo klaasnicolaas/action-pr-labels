@@ -6,8 +6,8 @@ type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
 export async function run(): Promise<void> {
   try {
-    const token = core.getInput('github-token', { required: true })
-    const prNumber = parseInt(core.getInput('pr-number', { required: true }), 10)
+    const token = core.getInput('repo-token')
+    const prNumber = parseInt(core.getInput('pr-number'), 10)
     const validLabels = core
       .getInput('valid-labels', { required: true })
       .split(',')

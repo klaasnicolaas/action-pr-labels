@@ -7,17 +7,19 @@ branding:
   color: "green"
 
 inputs:
-  github-token:
-    description: The GitHub token to use
-    required: true
+  repo-token:
+    description: "Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`."
+    required: false
+    default: ${{ github.token }}
   pr-number:
-    description: The Pull Request number
-    required: true
+    description: "Pull Request number"
+    required: false
+    default: "${{ github.event.pull_request.number }}"
   valid-labels:
-    description: List of labels that are valid
+    description: "List of labels that are valid"
     required: true
   invalid-labels:
-    description: List of labels that are invalid
+    description: "List of labels that are invalid"
     required: false
     default: ""
 
