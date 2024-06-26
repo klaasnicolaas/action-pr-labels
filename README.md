@@ -20,12 +20,35 @@ By specifying valid and/or invalid labels, this action ensures that pull request
 
 ## Inputs
 
-| Name              | Usage      | Description                                                         |
-| ----------------- | ---------- | ------------------------------------------------------------------- |
-| `github-token`    | _Required_ | The repository token, i.e. `${{ secrets.GITHUB_TOKEN }}`            |
-| `pr-number`       | _Required_ | Pull request number, i.e. `${{ github.event.pull_request.number }}` |
-| `valid-labels`    | _Required_ | A comma-separated list of valid labels.                             |
-| `invalid-labels`  | _Optional_ | A comma-separated list of invalid labels.                           |
+The following input parameters can be used to configure the action:
+
+### `repo-token`
+
+The GitHub token used to interact with the GitHub API.
+
+- Default: `${{ github.token }}`
+- Usage: **Optional**
+
+### `pr-number`
+
+The number of the pull request to validate.
+
+- Default: `${{ github.event.pull_request.number }}`
+- Usage: **Optional**
+
+### `valid-labels`
+
+A comma-separated list of valid labels that are allowed on the pull request.
+
+- Default: _None_
+- Usage: **Required**
+
+### `invalid-labels`
+
+A comma-separated list of invalid labels that are not allowed on the pull request.
+
+- Default: _None_
+- Usage: **Optional**
 
 ## Outputs
 
@@ -33,11 +56,36 @@ _None. This action does not set any outputs._
 
 ## Example workflow
 
+This example workflows demonstrates a minimal configuration to validate pull requests based on predefined labels. In this example, the action is configured to check for valid labels `breaking-change`, `bugfix`, `documentation`, and `enhancement`.
+
 ```yaml
 name: PR Labels
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened, labeled, unlabeled, synchronize]
+
+jobs:
+  validate:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏷 Verify PR has a valid label
+        uses: klaasnicolaas/action-pr-labels@v1
+        with:
+          valid-labels: >-
+            breaking-change, bugfix, documentation, enhancement
+```
+
+## Full workflow example
+
+This example workflow demonstrates a full example configuration to validate pull requests based on predefined labels. In this example, the action is configured to check for valid labels `breaking-change`, `bugfix`, `documentation`, and `enhancement`. Additionally, it checks for invalid labels `duplicate` and `invalid`.
+
+```yaml
+name: PR Labels
+
+on:
+  pull_request_target:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
@@ -52,6 +100,8 @@ jobs:
           pr-number: ${{ github.event.pull_request.number }}
           valid-labels: >-
             breaking-change, bugfix, documentation, enhancement
+          invalid-labels: >-
+            duplicate, invalid
 ```
 
 ## Contributing
