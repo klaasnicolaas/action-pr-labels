@@ -20,12 +20,35 @@ By specifying valid and/or invalid labels, this action ensures that pull request
 
 ## Inputs
 
-| Name              | Usage      | Default                                   | Description                               |
-| ----------------- | ---------- | ----------------------------------------- | ----------------------------------------- |
-| `github-token`    | _Optional_ | `${{ secrets.GITHUB_TOKEN }}`             | The repository token.                     |
-| `pr-number`       | _Optional_ | `${{ github.event.pull_request.number }}` | Pull request number.                      |
-| `valid-labels`    | _Required_ |                                           | A comma-separated list of valid labels.   |
-| `invalid-labels`  | _Optional_ |                                           | A comma-separated list of invalid labels. |
+The following input parameters can be used to configure the action:
+
+### `repo-token`
+
+The GitHub token used to interact with the GitHub API.
+
+- Default: `${{ github.token }}`
+- Usage: **Optional**
+
+### `pr-number`
+
+The number of the pull request to validate.
+
+- Default: `${{ github.event.pull_request.number }}`
+- Usage: **Optional**
+
+### `valid-labels`
+
+A comma-separated list of valid labels that are allowed on the pull request.
+
+- Default: _None_
+- Usage: **Required**
+
+### `invalid-labels`
+
+A comma-separated list of invalid labels that are not allowed on the pull request.
+
+- Default: _None_
+- Usage: **Optional**
 
 ## Outputs
 
@@ -39,7 +62,7 @@ This example workflows demonstrates a minimal configuration to validate pull req
 name: PR Labels
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
@@ -62,7 +85,7 @@ This example workflow demonstrates a full example configuration to validate pull
 name: PR Labels
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
