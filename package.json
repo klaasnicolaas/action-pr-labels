@@ -26,17 +26,39 @@
     "github",
     "labels"
   ],
+  "jest": {
+    "collectCoverage": true,
+    "coverageReporters": [
+      "json",
+      "text"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!chalk).+\\.js$"
+    ]
+  },
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/github": "^6.0.0",
-    "@octokit/rest": "^21.0.0"
+    "@octokit/rest": "^21.0.0",
+    "chalk": "^5.3.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
+    "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.12",
     "@vercel/ncc": "^0.38.1",
+    "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
     "prettier": "^3.3.2",
-    "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.2"
   }
