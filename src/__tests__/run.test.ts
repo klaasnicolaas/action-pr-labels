@@ -1,6 +1,10 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { run } from '../index'
+import { getPullRequestByNumber, run } from '../index'
+import { RestEndpointMethodTypes } from '@octokit/rest'
+import { describe, expect, it, jest, beforeEach } from '@jest/globals'
+
+type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -33,10 +37,16 @@ describe('GitHub Action - run', () => {
 
     mockGithub.context.eventName = 'pull_request'
 
-    const mockGetPullRequestByNumber = jest.fn()
+    const mockGetPullRequestByNumber = jest.fn() as jest.MockedFunction<
+      typeof getPullRequestByNumber
+    >
+
     mockGetPullRequestByNumber.mockResolvedValue({
-      labels: [{ name: 'bug' }, { name: 'wontfix' }],
-    })
+      labels: [
+        { name: 'bug', color: 'ffffff' },
+        { name: 'wontfix', color: 'ff0000' },
+      ],
+    } as PullRequest)
 
     await run()
 
