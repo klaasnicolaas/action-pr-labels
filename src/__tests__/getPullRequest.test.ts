@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import { getPullRequestByNumber } from '../index'
+import { describe, expect, it, jest } from '@jest/globals'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -11,7 +12,7 @@ describe('GitHub Action - getPullRequestByNumber', () => {
     const mockOctokit = {
       rest: {
         pulls: {
-          get: jest.fn().mockResolvedValue({ data: { number: 1 } }),
+          get: jest.fn().mockResolvedValue({ data: { number: 1 } } as never),
         },
       },
     }
@@ -30,7 +31,7 @@ describe('GitHub Action - getPullRequestByNumber', () => {
     const mockOctokit = {
       rest: {
         pulls: {
-          get: jest.fn().mockRejectedValue(new Error('API Error')),
+          get: jest.fn().mockRejectedValue(new Error('API Error') as never),
         },
       },
     }

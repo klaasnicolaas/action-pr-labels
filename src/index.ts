@@ -4,6 +4,10 @@ import { RestEndpointMethodTypes } from '@octokit/rest'
 
 type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
+interface Label {
+  name: string
+}
+
 export async function run(): Promise<void> {
   try {
     const token = core.getInput('repo-token')
@@ -40,11 +44,7 @@ export async function run(): Promise<void> {
       core.setFailed('Error: Pull request not found')
     }
   } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(`Error: ${error.message}`)
-    } else {
-      core.setFailed('An unknown error occurred')
-    }
+    core.setFailed(`Error: ${error}`)
   }
 }
 
@@ -74,30 +74,46 @@ export async function validatePullRequest(
   validLabels: string[],
   invalidLabels: string[],
 ): Promise<void> {
-  const prLabels = pr.labels.map((label) => label.name)
-  const prValidLabels = prLabels.filter((label) => validLabels.includes(label))
-  const prInvalidLabels = prLabels.filter((label) =>
-    invalidLabels.includes(label),
-  )
+  const prLabels: Label[] = pr.labels.map((label) => ({
+    name: label.name,
+  }))
 
-  // Log invalid labels
-  if (prInvalidLabels.length > 0) {
-    core.setFailed(`Invalid labels found: ${prInvalidLabels.join(', ')}`)
-  } else {
-    core.info(`No invalid labels found`)
-  }
+  // Prepare arrays for valid and invalid labels
+  const prValidLabels: Label[] = []
+  const prInvalidLabels: Label[] = []
+
+  // Check validity of each label
+  prLabels.forEach((label) => {
+    if (validLabels.includes(label.name)) {
+      prValidLabels.push(label)
+    } else if (invalidLabels.includes(label.name)) {
+      prInvalidLabels.push(label)
+    }
+  })
 
   // Log valid labels
   if (prValidLabels.length > 0) {
-    core.info(`Valid labels found: ${JSON.stringify(prValidLabels)}`)
+    core.info(
+      `Valid labels found: ${prValidLabels.map((label) => label.name).join(', ')}`,
+    )
   } else {
     core.setFailed(
       `No valid labels found. Expected one of: ${validLabels.join(', ')}`,
     )
   }
 
+  // Log invalid labels
+  if (prInvalidLabels.length > 0) {
+    core.setFailed(
+      `Invalid labels found: ${prInvalidLabels.map((label) => label.name).join(', ')}`,
+    )
+  }
+
+  // Final check
   if (prInvalidLabels.length === 0 && prValidLabels.length > 0) {
     core.info('Labels from this PR match the expected labels')
+  } else {
+    core.setFailed('Labels from this PR do not match the expected labels')
   }
 }
 

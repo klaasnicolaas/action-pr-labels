@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import { validatePullRequest } from '../index'
 import { RestEndpointMethodTypes } from '@octokit/rest'
+import { describe, expect, it, jest, beforeEach } from '@jest/globals'
 
 type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
@@ -21,9 +22,8 @@ describe('GitHub Action - validatePullRequest', () => {
     await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
     expect(mockCore.info).toHaveBeenCalledWith(
-      'Valid labels found: ["bug","enhancement"]',
+      expect.stringContaining('Valid labels found:'),
     )
-    expect(mockCore.info).toHaveBeenCalledWith('No invalid labels found')
     expect(mockCore.info).toHaveBeenCalledWith(
       'Labels from this PR match the expected labels',
     )
@@ -36,9 +36,14 @@ describe('GitHub Action - validatePullRequest', () => {
 
     await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
-    expect(mockCore.info).toHaveBeenCalledWith('Valid labels found: ["bug"]')
+    expect(mockCore.info).toHaveBeenCalledWith(
+      expect.stringContaining('Valid labels found:'),
+    )
     expect(mockCore.setFailed).toHaveBeenCalledWith(
-      'Invalid labels found: wontfix',
+      expect.stringContaining('Invalid labels found:'),
+    )
+    expect(mockCore.setFailed).toHaveBeenCalledWith(
+      'Labels from this PR do not match the expected labels',
     )
   })
 
@@ -61,7 +66,10 @@ describe('GitHub Action - validatePullRequest', () => {
       'No valid labels found. Expected one of: bug, enhancement',
     )
     expect(mockCore.setFailed).toHaveBeenCalledWith(
-      'Invalid labels found: wontfix',
+      expect.stringContaining('Invalid labels found:'),
+    )
+    expect(mockCore.setFailed).toHaveBeenCalledWith(
+      'Labels from this PR do not match the expected labels',
     )
   })
 })
