@@ -1,16 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { RestEndpointMethodTypes } from '@octokit/rest'
-import chalk from 'chalk'
-
-import { getTextColor } from './color'
 
 type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
 interface Label {
   name: string
-  textColor: string
-  backgroundColor: string
 }
 
 export async function run(): Promise<void> {
@@ -81,8 +76,6 @@ export async function validatePullRequest(
 ): Promise<void> {
   const prLabels: Label[] = pr.labels.map((label) => ({
     name: label.name,
-    textColor: getTextColor(label.color),
-    backgroundColor: `#${label.color}`,
   }))
 
   // Prepare arrays for valid and invalid labels
@@ -98,17 +91,11 @@ export async function validatePullRequest(
     }
   })
 
-  // Prepare formatted labels for logging
-  const formattedValidLabels = prValidLabels.map((label) =>
-    chalk.bgHex(label.backgroundColor).hex(label.textColor)(`${label.name}`),
-  )
-  const formattedInvalidLabels = prInvalidLabels.map((label) =>
-    chalk.bgHex(label.backgroundColor).hex(label.textColor)(`${label.name}`),
-  )
-
   // Log valid labels
   if (prValidLabels.length > 0) {
-    core.info(`Valid labels found: ${formattedValidLabels.join(', ')}`)
+    core.info(
+      `Valid labels found: ${prValidLabels.map((label) => label.name).join(', ')}`,
+    )
   } else {
     core.setFailed(
       `No valid labels found. Expected one of: ${validLabels.join(', ')}`,
@@ -117,7 +104,9 @@ export async function validatePullRequest(
 
   // Log invalid labels
   if (prInvalidLabels.length > 0) {
-    core.setFailed(`Invalid labels found: ${formattedInvalidLabels.join(', ')}`)
+    core.setFailed(
+      `Invalid labels found: ${prInvalidLabels.map((label) => label.name).join(', ')}`,
+    )
   }
 
   // Final check

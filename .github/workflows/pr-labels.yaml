@@ -6,9 +6,6 @@ on:
   pull_request_target:
     types: [opened, labeled, unlabeled, synchronize]
 
-env:
-  FORCE_COLOR: 3
-
 jobs:
   validate:
     name: Verify
