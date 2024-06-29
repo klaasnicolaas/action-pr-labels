@@ -24,7 +24,9 @@ export async function run(): Promise<void> {
     // Log the PR number, valid and invalid labels
     core.info(`Pull request number: ${prNumber}`)
     core.info(`Valid labels are: ${JSON.stringify(validLabels)}`)
-    core.info(`Invalid labels are: ${JSON.stringify(invalidLabels)}`)
+    core.info(
+      `Invalid labels are: ${invalidLabels.length > 0 ? JSON.stringify(invalidLabels) : 'None'}`,
+    )
 
     const { context } = github
     const octokit = github.getOctokit(token)
@@ -94,7 +96,7 @@ export async function validatePullRequest(
   // Log valid labels
   if (prValidLabels.length > 0) {
     core.info(
-      `Valid labels found: ${prValidLabels.map((label) => label.name).join(', ')}`,
+      `Valid labels found: ${JSON.stringify(prValidLabels.map((label) => label.name))}`,
     )
   } else {
     core.setFailed(
@@ -105,7 +107,7 @@ export async function validatePullRequest(
   // Log invalid labels
   if (prInvalidLabels.length > 0) {
     core.setFailed(
-      `Invalid labels found: ${prInvalidLabels.map((label) => label.name).join(', ')}`,
+      `Invalid labels found: ${JSON.stringify(prInvalidLabels.map((label) => label.name))}`,
     )
   }
 
