@@ -22,8 +22,8 @@ export async function run(): Promise<void> {
       .map((label) => label.trim())
 
     // Log the PR number, valid and invalid labels
-    core.info(`Pull request number: ${prNumber}`)
-    core.info(`Valid labels are: ${JSON.stringify(validLabels)}`)
+    core.debug(`Pull request number: ${prNumber}`)
+    core.info(`Valid labels are: ${JSON.stringify(validLabels, null, 2)}`)
     core.info(
       `Invalid labels are: ${invalidLabels.length > 0 ? JSON.stringify(invalidLabels) : 'None'}`,
     )
