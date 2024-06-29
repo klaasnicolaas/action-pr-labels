@@ -18,8 +18,9 @@ export async function run(): Promise<void> {
       .map((label) => label.trim())
     const invalidLabels = core
       .getInput('invalid-labels')
-      .split(',')
+      ?.split(',')
       .map((label) => label.trim())
+      .filter((label) => label) || []
 
     // Log the PR number, valid and invalid labels
     core.debug(`Pull request number: ${prNumber}`)

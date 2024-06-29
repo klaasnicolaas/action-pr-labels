@@ -1,0 +1,26 @@
+# .husky/pre-commit.sh
+npm test
+
+# Check for staged changes in src and dist directories
+hasSrcChanges=$(git diff --cached --name-only | grep '^src/' || true)
+hasDistChanges=$(git diff --cached --name-only | grep '^dist/' || true)
+
+if [ -n "$hasSrcChanges" ] || [ -n "$hasDistChanges" ]; then
+  # Check if both src and dist changes are staged
+  if [ -n "$hasSrcChanges" ] && [ -n "$hasDistChanges" ]; then
+    # Continue with the commit if both src and dist changes are staged
+    echo "Staged changes found in both src and dist directories. Commit will proceed."
+  elif [ -z "$hasSrcChanges" ] && [ -n "$hasDistChanges" ]; then
+    # Continue with the commit if only dist changes are staged
+    echo "Staged changes found only in dist directory. Commit will proceed."
+  else
+    # Run npm run build to update dist directory if only src changes are staged
+    if [ -n "$hasSrcChanges" ]; then
+      npm run build
+      echo "Please add changes in the dist/ directory manually after build."
+    fi
+
+    # Exit with error if only src changes are staged and dist changes are not staged
+    exit 1
+  fi
+fi
