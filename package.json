@@ -10,7 +10,8 @@
     "format:check": "prettier --check src/**/*.ts",
     "format:fix": "prettier --write src/**/*.ts",
     "typing:check": "tsc --noEmit",
-    "test": "jest tests"
+    "test": "jest tests",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -56,6 +57,7 @@
     "@types/jest": "^29.5.12",
     "@vercel/ncc": "^0.38.1",
     "babel-jest": "^29.7.0",
+    "husky": "^9.0.11",
     "jest": "^29.7.0",
     "prettier": "^3.3.2",
     "ts-node": "^10.9.2",
