@@ -23,7 +23,7 @@ export async function run(): Promise<void> {
 
     // Log the PR number, valid and invalid labels
     core.debug(`Pull request number: ${prNumber}`)
-    core.info(`Valid labels are: ${JSON.stringify(validLabels, null, 2)}`)
+    core.info(`Valid labels are: ${JSON.stringify(validLabels)}`)
     core.info(
       `Invalid labels are: ${invalidLabels.length > 0 ? JSON.stringify(invalidLabels) : 'None'}`,
     )
