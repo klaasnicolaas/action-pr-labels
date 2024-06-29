@@ -45,12 +45,13 @@ async function run() {
             .map((label) => label.trim());
         const invalidLabels = core
             .getInput('invalid-labels')
-            .split(',')
-            .map((label) => label.trim());
+            ?.split(',')
+            .map((label) => label.trim())
+            .filter((label) => label) || [];
         // Log the PR number, valid and invalid labels
-        core.info(`Pull request number: ${prNumber}`);
+        core.debug(`Pull request number: ${prNumber}`);
         core.info(`Valid labels are: ${JSON.stringify(validLabels)}`);
-        core.info(`Invalid labels are: ${JSON.stringify(invalidLabels)}`);
+        core.info(`Invalid labels are: ${invalidLabels.length > 0 ? JSON.stringify(invalidLabels) : 'None'}`);
         const { context } = github;
         const octokit = github.getOctokit(token);
         core.debug(`Fetching pull request details for PR number ${prNumber}`);
@@ -101,14 +102,14 @@ async function validatePullRequest(pr, validLabels, invalidLabels) {
     });
     // Log valid labels
     if (prValidLabels.length > 0) {
-        core.info(`Valid labels found: ${prValidLabels.map((label) => label.name).join(', ')}`);
+        core.info(`Valid labels found: ${JSON.stringify(prValidLabels.map((label) => label.name))}`);
     }
     else {
         core.setFailed(`No valid labels found. Expected one of: ${validLabels.join(', ')}`);
     }
     // Log invalid labels
     if (prInvalidLabels.length > 0) {
-        core.setFailed(`Invalid labels found: ${prInvalidLabels.map((label) => label.name).join(', ')}`);
+        core.setFailed(`Invalid labels found: ${JSON.stringify(prInvalidLabels.map((label) => label.name))}`);
     }
     // Final check
     if (prInvalidLabels.length === 0 && prValidLabels.length > 0) {
