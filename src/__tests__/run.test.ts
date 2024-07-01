@@ -28,7 +28,7 @@ describe('GitHub Action - run', () => {
 
   it('should log valid and invalid labels', async () => {
     mockCore.getInput.mockImplementation((name) => {
-      if (name === 'github-token') return 'fake-token'
+      if (name === 'repo-token') return 'fake-token'
       if (name === 'valid-labels') return 'bug,enhancement'
       if (name === 'invalid-labels') return 'wontfix'
       if (name === 'pr-number') return '1'

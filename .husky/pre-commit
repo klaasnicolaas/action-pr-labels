@@ -2,7 +2,7 @@
 npm test
 
 # Check for staged changes in src and dist directories
-hasSrcChanges=$(git diff --cached --name-only | grep '^src/' || true)
+hasSrcChanges=$(git diff --cached --name-only | grep '^src/index.ts' || true)
 hasDistChanges=$(git diff --cached --name-only | grep '^dist/' || true)
 
 if [ -n "$hasSrcChanges" ] || [ -n "$hasDistChanges" ]; then

@@ -96,7 +96,7 @@ jobs:
       - name: 🏷 Verify PR has a valid label
         uses: klaasnicolaas/action-pr-labels@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           pr-number: ${{ github.event.pull_request.number }}
           valid-labels: >-
             breaking-change, bugfix, documentation, enhancement
