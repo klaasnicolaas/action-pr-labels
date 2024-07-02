@@ -119,9 +119,8 @@ async function validatePullRequest(pr, validLabels, invalidLabels) {
         core.setFailed('Labels from this PR do not match the expected labels');
     }
 }
-if (!process.env.JEST_WORKER_ID) {
-    run();
-}
+// Run the action
+run();
 
 
 /***/ }),

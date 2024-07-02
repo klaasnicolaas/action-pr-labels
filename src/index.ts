@@ -120,6 +120,5 @@ export async function validatePullRequest(
   }
 }
 
-if (!process.env.JEST_WORKER_ID) {
-  run()
-}
+// Run the action
+run()
