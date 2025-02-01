@@ -122,7 +122,7 @@ Distributed under the **Apache License 2.0** license. See [`LICENSE`](LICENSE) f
 [codecov-shield]: https://codecov.io/gh/klaasnicolaas/action-pr-labels/branch/main/graph/badge.svg?token=ZWRTTOMS93
 [codecov-url]: https://codecov.io/gh/klaasnicolaas/action-pr-labels
 [license-shield]: https://img.shields.io/github/license/klaasnicolaas/action-pr-labels.svg
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2024.svg
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-production%20ready-brightgreen.svg
 [releases-shield]: https://img.shields.io/github/release/klaasnicolaas/action-pr-labels.svg
 [releases]: https://github.com/klaasnicolaas/action-pr-labels/releases
