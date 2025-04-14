@@ -1,8 +1,9 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { RestEndpointMethodTypes } from '@octokit/rest'
+import { components } from '@octokit/openapi-types'
 
-type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
+type GitHubPR = components['schemas']['pull-request']
 
 interface Label {
   name: string
@@ -57,7 +58,7 @@ export async function getPullRequestByNumber(
   owner: string,
   repo: string,
   prNumber: number,
-): Promise<PullRequest | undefined> {
+): Promise<GitHubPR | undefined> {
   try {
     const { data: pr } = await octokit.rest.pulls.get({
       owner,
@@ -73,7 +74,7 @@ export async function getPullRequestByNumber(
 
 // Validate pull request labels
 export async function validatePullRequest(
-  pr: PullRequest,
+  pr: GitHubPR,
   validLabels: string[],
   invalidLabels: string[],
 ): Promise<void> {
