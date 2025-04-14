@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { RestEndpointMethodTypes } from '@octokit/rest'
-import { components } from '@octokit/openapi-types'
+import type { RestEndpointMethodTypes } from '@octokit/rest'
 
-type GitHubPR = components['schemas']['pull-request']
+type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
+type PullRequestLabel = PullRequest['labels'][number]
 
 interface Label {
   name: string
@@ -11,8 +11,8 @@ interface Label {
 
 export async function run(): Promise<void> {
   try {
-    const token = core.getInput('repo-token')
-    const prNumber = parseInt(core.getInput('pr-number'), 10)
+    const token = core.getInput('repo-token', { required: true })
+    const prNumber = parseInt(core.getInput('pr-number', { required: true }), 10)
     const validLabels = core
       .getInput('valid-labels', { required: true })
       .split(',')
@@ -26,9 +26,7 @@ export async function run(): Promise<void> {
     // Log the PR number, valid and invalid labels
     core.debug(`Pull request number: ${prNumber}`)
     core.info(`Valid labels are: ${JSON.stringify(validLabels)}`)
-    core.info(
-      `Invalid labels are: ${invalidLabels.length > 0 ? JSON.stringify(invalidLabels) : 'None'}`,
-    )
+    core.info(`Invalid labels are: ${invalidLabels.length > 0 ? JSON.stringify(invalidLabels) : 'None'}`)
 
     const { context } = github
     const octokit = github.getOctokit(token)
@@ -48,7 +46,7 @@ export async function run(): Promise<void> {
       core.setFailed('Error: Pull request not found')
     }
   } catch (error) {
-    core.setFailed(`Error: ${error}`)
+    core.setFailed(`Error: ${(error as Error).message}`)
   }
 }
 
@@ -58,14 +56,14 @@ export async function getPullRequestByNumber(
   owner: string,
   repo: string,
   prNumber: number,
-): Promise<GitHubPR | undefined> {
+): Promise<PullRequest | undefined> {
   try {
     const { data: pr } = await octokit.rest.pulls.get({
       owner,
       repo,
       pull_number: prNumber,
     })
-    return pr
+    return pr as PullRequest
   } catch (error) {
     core.error(`Error fetching pull request #${prNumber}: ${error}`)
     return undefined
@@ -74,11 +72,11 @@ export async function getPullRequestByNumber(
 
 // Validate pull request labels
 export async function validatePullRequest(
-  pr: GitHubPR,
+  pr: PullRequest,
   validLabels: string[],
   invalidLabels: string[],
 ): Promise<void> {
-  const prLabels: Label[] = pr.labels.map((label) => ({
+  const prLabels: Label[] = pr.labels.map((label: PullRequestLabel) => ({
     name: label.name,
   }))
 
@@ -97,20 +95,14 @@ export async function validatePullRequest(
 
   // Log valid labels
   if (prValidLabels.length > 0) {
-    core.info(
-      `Valid labels found: ${JSON.stringify(prValidLabels.map((label) => label.name))}`,
-    )
+    core.info(`Valid labels found: ${JSON.stringify(prValidLabels.map((l) => l.name))}`)
   } else {
-    core.setFailed(
-      `No valid labels found. Expected one of: ${validLabels.join(', ')}`,
-    )
+    core.setFailed(`No valid labels found. Expected one of: ${validLabels.join(', ')}`)
   }
 
   // Log invalid labels
   if (prInvalidLabels.length > 0) {
-    core.setFailed(
-      `Invalid labels found: ${JSON.stringify(prInvalidLabels.map((label) => label.name))}`,
-    )
+    core.setFailed(`Invalid labels found: ${JSON.stringify(prInvalidLabels.map((l) => l.name))}`)
   }
 
   // Final check
