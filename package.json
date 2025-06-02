@@ -47,7 +47,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
-    "@octokit/rest": "^21.0.0"
+    "@octokit/rest": "^22.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.7",
