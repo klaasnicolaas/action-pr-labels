@@ -69,6 +69,9 @@ jobs:
   validate:
     name: Verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: 🏷 Verify PR has a valid label
         uses: klaasnicolaas/action-pr-labels@v1
@@ -92,6 +95,9 @@ jobs:
   validate:
     name: Verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: 🏷 Verify PR has a valid label
         uses: klaasnicolaas/action-pr-labels@v1
