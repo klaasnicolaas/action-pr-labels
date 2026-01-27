@@ -1,9 +1,12 @@
 {
   "name": "action-pr-labels",
   "description": "Check if a Pull Request has valid labels",
-  "version": "2.0.0",
+  "version": "0.0.0",
   "license": "Apache-2.0",
   "main": "dist/index.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "author": "Klaas Schoute <hello@student-techlife.com>",
   "scripts": {
     "build": "tsc -p tsconfig.build.json && ncc build",
