@@ -216,4 +216,118 @@ describe('GitHub Action - run', () => {
 
     expect(mockListComments).not.toHaveBeenCalled()
   })
+
+  it('should post comment when no valid labels are found', async () => {
+    const mockCreateComment = vi.fn()
+    const mockListComments = vi.fn().mockResolvedValue({ data: [] })
+    const mockOctokit = {
+      rest: {
+        pulls: {
+          get: vi.fn().mockResolvedValue({
+            data: { labels: [{ name: 'random' }] },
+          }),
+        },
+        issues: {
+          listComments: mockListComments,
+          createComment: mockCreateComment,
+        },
+      },
+    }
+
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return 'bug,enhancement'
+      if (name === 'invalid-labels') return ''
+      if (name === 'pr-number') return '1'
+      if (name === 'post-comment') return 'true'
+      return ''
+    })
+
+    const github = await import('@actions/github')
+    vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
+
+    await run()
+
+    expect(mockCreateComment).toHaveBeenCalledWith({
+      owner: 'test-owner',
+      repo: 'test-repo',
+      issue_number: 1,
+      body: expect.stringContaining('No valid labels found'),
+    })
+  })
+
+  it('should post comment when invalid labels are found', async () => {
+    const mockCreateComment = vi.fn()
+    const mockListComments = vi.fn().mockResolvedValue({ data: [] })
+    const mockOctokit = {
+      rest: {
+        pulls: {
+          get: vi.fn().mockResolvedValue({
+            data: { labels: [{ name: 'bug' }, { name: 'wontfix' }] },
+          }),
+        },
+        issues: {
+          listComments: mockListComments,
+          createComment: mockCreateComment,
+        },
+      },
+    }
+
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return 'bug,enhancement'
+      if (name === 'invalid-labels') return 'wontfix'
+      if (name === 'pr-number') return '1'
+      if (name === 'post-comment') return 'true'
+      return ''
+    })
+
+    const github = await import('@actions/github')
+    vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
+
+    await run()
+
+    expect(mockCreateComment).toHaveBeenCalledWith({
+      owner: 'test-owner',
+      repo: 'test-repo',
+      issue_number: 1,
+      body: expect.stringContaining('Invalid labels found'),
+    })
+  })
+
+  it('should post comment with mixed valid and invalid labels', async () => {
+    const mockCreateComment = vi.fn()
+    const mockListComments = vi.fn().mockResolvedValue({ data: [] })
+    const mockOctokit = {
+      rest: {
+        pulls: {
+          get: vi.fn().mockResolvedValue({
+            data: { labels: [{ name: 'bug' }, { name: 'wontfix' }] },
+          }),
+        },
+        issues: {
+          listComments: mockListComments,
+          createComment: mockCreateComment,
+        },
+      },
+    }
+
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return 'bug,enhancement'
+      if (name === 'invalid-labels') return 'wontfix'
+      if (name === 'pr-number') return '1'
+      if (name === 'post-comment') return 'true'
+      return ''
+    })
+
+    const github = await import('@actions/github')
+    vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
+
+    await run()
+
+    const createCallBody = mockCreateComment.mock.calls[0][0].body
+    expect(createCallBody).toContain('Valid labels found')
+    expect(createCallBody).toContain('Invalid labels found')
+  })
 })
