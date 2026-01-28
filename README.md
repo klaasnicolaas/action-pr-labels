@@ -17,6 +17,7 @@ By specifying valid and/or invalid labels, this action ensures that pull request
 - **Label Validation**: Ensures that a pull request has at least one valid label and no invalid labels.
 - **Detailed Error Messages**: Provides clear error messages when no valid labels are found or when invalid labels are detected, causing the action to fail.
 - **Outputs**: Exposes validation results as outputs (`is-valid`, `valid-labels-found`, `invalid-labels-found`) for use in subsequent workflow steps.
+- **Glob Pattern Support**: Labels support `*` wildcards for flexible matching (e.g., `type/*` matches `type/bug`, `scope-*` matches `scope-frontend`).
 - **Easy Configuration**: Labels can be easily configured through the action's [input parameters](#inputs).
 
 ## Inputs
@@ -39,14 +40,14 @@ The number of the pull request to validate.
 
 ### `valid-labels`
 
-A comma-separated list of valid labels that are allowed on the pull request.
+A comma-separated list of valid labels that are allowed on the pull request. Supports `*` as a wildcard to match any characters (e.g., `type/*` matches `type/bug`, `type/feature`, etc.).
 
 - Default: _None_
 - Usage: **Required**
 
 ### `invalid-labels`
 
-A comma-separated list of invalid labels that are not allowed on the pull request.
+A comma-separated list of invalid labels that are not allowed on the pull request. Also supports `*` wildcards.
 
 - Default: _None_
 - Usage: **Optional**

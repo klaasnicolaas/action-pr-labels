@@ -15,24 +15,46 @@ export interface ValidationResult {
   invalidLabels: string[]
 }
 
+/**
+ * Check if a label matches a glob pattern.
+ * Supports `*` as a wildcard that matches any characters.
+ * Examples: "type/*" matches "type/bug", "scope-*" matches "scope-frontend"
+ */
+export function matchesPattern(label: string, pattern: string): boolean {
+  const regexStr = pattern
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*/g, '.*')
+  return new RegExp(`^${regexStr}$`).test(label)
+}
+
+function matchesAnyPattern(label: string, patterns: string[]): boolean {
+  return patterns.some((pattern) => matchesPattern(label, pattern))
+}
+
 export async function run(): Promise<void> {
   try {
     const token = core.getInput('repo-token', { required: true })
-    const prNumber = parseInt(core.getInput('pr-number', { required: true }), 10)
+    const prNumber = parseInt(
+      core.getInput('pr-number', { required: true }),
+      10,
+    )
     const validLabels = core
       .getInput('valid-labels', { required: true })
       .split(',')
       .map((label) => label.trim())
-    const invalidLabels = core
-      .getInput('invalid-labels')
-      ?.split(',')
-      .map((label) => label.trim())
-      .filter((label) => label) || []
+    const invalidLabels =
+      core
+        .getInput('invalid-labels')
+        ?.split(',')
+        .map((label) => label.trim())
+        .filter((label) => label) || []
 
     // Log the PR number, valid and invalid labels
     core.debug(`Pull request number: ${prNumber}`)
     core.info(`Valid labels are: ${JSON.stringify(validLabels)}`)
-    core.info(`Invalid labels are: ${invalidLabels.length > 0 ? JSON.stringify(invalidLabels) : 'None'}`)
+    core.info(
+      `Invalid labels are: ${invalidLabels.length > 0 ? JSON.stringify(invalidLabels) : 'None'}`,
+    )
 
     const { context } = github
     const octokit = github.getOctokit(token)
@@ -52,15 +74,22 @@ export async function run(): Promise<void> {
       // Set outputs
       core.setOutput('is-valid', result.isValid)
       core.setOutput('valid-labels-found', JSON.stringify(result.validLabels))
-      core.setOutput('invalid-labels-found', JSON.stringify(result.invalidLabels))
+      core.setOutput(
+        'invalid-labels-found',
+        JSON.stringify(result.invalidLabels),
+      )
 
       // Fail if not valid
       if (!result.isValid) {
         if (result.validLabels.length === 0) {
-          core.setFailed(`No valid labels found. Expected one of: ${validLabels.join(', ')}`)
+          core.setFailed(
+            `No valid labels found. Expected one of: ${validLabels.join(', ')}`,
+          )
         }
         if (result.invalidLabels.length > 0) {
-          core.setFailed(`Invalid labels found: ${JSON.stringify(result.invalidLabels)}`)
+          core.setFailed(
+            `Invalid labels found: ${JSON.stringify(result.invalidLabels)}`,
+          )
         }
         core.setFailed('Labels from this PR do not match the expected labels')
       } else {
@@ -108,9 +137,9 @@ export function validatePullRequest(
   const foundInvalidLabels: string[] = []
 
   prLabels.forEach((label) => {
-    if (validLabels.includes(label.name)) {
+    if (matchesAnyPattern(label.name, validLabels)) {
       foundValidLabels.push(label.name)
-    } else if (invalidLabels.includes(label.name)) {
+    } else if (matchesAnyPattern(label.name, invalidLabels)) {
       foundInvalidLabels.push(label.name)
     }
   })

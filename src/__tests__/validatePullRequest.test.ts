@@ -58,4 +58,27 @@ describe('GitHub Action - validatePullRequest', () => {
     expect(result.validLabels).toEqual([])
     expect(result.invalidLabels).toEqual(['wontfix'])
   })
+
+  it('should match valid labels using glob patterns', () => {
+    const pr = {
+      labels: [{ name: 'type/bug' }, { name: 'scope-frontend' }],
+    } as PullRequest
+
+    const result = validatePullRequest(pr, ['type/*', 'scope-*'], [])
+
+    expect(result.isValid).toBe(true)
+    expect(result.validLabels).toEqual(['type/bug', 'scope-frontend'])
+  })
+
+  it('should match invalid labels using glob patterns', () => {
+    const pr = {
+      labels: [{ name: 'type/bug' }, { name: 'auto/stale' }],
+    } as PullRequest
+
+    const result = validatePullRequest(pr, ['type/*'], ['auto/*'])
+
+    expect(result.isValid).toBe(false)
+    expect(result.validLabels).toEqual(['type/bug'])
+    expect(result.invalidLabels).toEqual(['auto/stale'])
+  })
 })
