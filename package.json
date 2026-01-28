@@ -4,13 +4,13 @@
   "version": "0.0.0",
   "license": "Apache-2.0",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "engines": {
     "node": ">=22.0.0"
   },
   "author": "Klaas Schoute <hello@student-techlife.com>",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --format=cjs",
     "format:check": "prettier --check src/**/*.ts",
     "format:fix": "prettier --write src/**/*.ts",
     "typing:check": "tsc --noEmit",
