@@ -10,7 +10,7 @@
   },
   "author": "Klaas Schoute <hello@student-techlife.com>",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && ncc build",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm",
     "format:check": "prettier --check src/**/*.ts",
     "format:fix": "prettier --write src/**/*.ts",
     "typing:check": "tsc --noEmit",
@@ -39,11 +39,11 @@
     "@octokit/rest": "^22.0.0"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.1",
+    "@types/node": "^25.0.0",
     "@vitest/coverage-v8": "^4.0.18",
+    "esbuild": "^0.25.0",
     "husky": "^9.0.11",
     "prettier": "^3.3.2",
-    "ts-node": "^10.9.2",
     "typescript": "^5.5.2",
     "vitest": "^4.0.18"
   }
