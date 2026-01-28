@@ -48,6 +48,7 @@ export async function run(): Promise<void> {
         ?.split(',')
         .map((label) => label.trim())
         .filter((label) => label) || []
+    const postComment = core.getInput('post-comment').toLowerCase() === 'true'
 
     // Log the PR number, valid and invalid labels
     core.debug(`Pull request number: ${prNumber}`)
@@ -78,6 +79,18 @@ export async function run(): Promise<void> {
         'invalid-labels-found',
         JSON.stringify(result.invalidLabels),
       )
+
+      // Post comment if enabled
+      if (postComment) {
+        await postValidationComment(
+          octokit,
+          context.repo.owner,
+          context.repo.repo,
+          prNumber,
+          result,
+          validLabels,
+        )
+      }
 
       // Fail if not valid
       if (!result.isValid) {
@@ -155,6 +168,70 @@ export function validatePullRequest(
     isValid: foundValidLabels.length > 0 && foundInvalidLabels.length === 0,
     validLabels: foundValidLabels,
     invalidLabels: foundInvalidLabels,
+  }
+}
+
+const COMMENT_HEADER = '### 🏷️ Label Validation'
+
+// Post or update a validation comment on the PR
+export async function postValidationComment(
+  octokit: ReturnType<typeof github.getOctokit>,
+  owner: string,
+  repo: string,
+  prNumber: number,
+  result: ValidationResult,
+  expectedLabels: string[],
+): Promise<void> {
+  const lines: string[] = [COMMENT_HEADER, '']
+
+  if (result.isValid) {
+    lines.push(
+      `✅ **Valid labels found:** ${result.validLabels.map((l) => `\`${l}\``).join(', ')}`,
+    )
+  } else {
+    if (result.validLabels.length === 0) {
+      lines.push(
+        `❌ **No valid labels found.** Expected one of: ${expectedLabels.map((l) => `\`${l}\``).join(', ')}`,
+      )
+    } else {
+      lines.push(
+        `✅ **Valid labels found:** ${result.validLabels.map((l) => `\`${l}\``).join(', ')}`,
+      )
+    }
+    if (result.invalidLabels.length > 0) {
+      lines.push(
+        `❌ **Invalid labels found:** ${result.invalidLabels.map((l) => `\`${l}\``).join(', ')}`,
+      )
+    }
+  }
+
+  const body = lines.join('\n')
+
+  // Check for existing comment to update
+  const { data: comments } = await octokit.rest.issues.listComments({
+    owner,
+    repo,
+    issue_number: prNumber,
+  })
+
+  const existingComment = comments.find((comment) =>
+    comment.body?.startsWith(COMMENT_HEADER),
+  )
+
+  if (existingComment) {
+    await octokit.rest.issues.updateComment({
+      owner,
+      repo,
+      comment_id: existingComment.id,
+      body,
+    })
+  } else {
+    await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: prNumber,
+      body,
+    })
   }
 }
 

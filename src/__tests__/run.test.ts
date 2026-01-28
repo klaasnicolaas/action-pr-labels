@@ -99,4 +99,121 @@ describe('GitHub Action - run', () => {
       expect.stringContaining('do not match the expected labels'),
     )
   })
+
+  it('should create a comment when post-comment is enabled', async () => {
+    const mockCreateComment = vi.fn()
+    const mockListComments = vi.fn().mockResolvedValue({ data: [] })
+    const mockOctokit = {
+      rest: {
+        pulls: {
+          get: vi.fn().mockResolvedValue({
+            data: { labels: [{ name: 'bug' }] },
+          }),
+        },
+        issues: {
+          listComments: mockListComments,
+          createComment: mockCreateComment,
+        },
+      },
+    }
+
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return 'bug,enhancement'
+      if (name === 'invalid-labels') return ''
+      if (name === 'pr-number') return '1'
+      if (name === 'post-comment') return 'true'
+      return ''
+    })
+
+    const github = await import('@actions/github')
+    vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
+
+    await run()
+
+    expect(mockListComments).toHaveBeenCalledWith({
+      owner: 'test-owner',
+      repo: 'test-repo',
+      issue_number: 1,
+    })
+    expect(mockCreateComment).toHaveBeenCalledWith({
+      owner: 'test-owner',
+      repo: 'test-repo',
+      issue_number: 1,
+      body: expect.stringContaining('Label Validation'),
+    })
+  })
+
+  it('should update existing comment when one already exists', async () => {
+    const mockUpdateComment = vi.fn()
+    const mockListComments = vi.fn().mockResolvedValue({
+      data: [{ id: 42, body: '### 🏷️ Label Validation\n\nOld content' }],
+    })
+    const mockOctokit = {
+      rest: {
+        pulls: {
+          get: vi.fn().mockResolvedValue({
+            data: { labels: [{ name: 'bug' }] },
+          }),
+        },
+        issues: {
+          listComments: mockListComments,
+          updateComment: mockUpdateComment,
+        },
+      },
+    }
+
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return 'bug'
+      if (name === 'invalid-labels') return ''
+      if (name === 'pr-number') return '1'
+      if (name === 'post-comment') return 'true'
+      return ''
+    })
+
+    const github = await import('@actions/github')
+    vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
+
+    await run()
+
+    expect(mockUpdateComment).toHaveBeenCalledWith({
+      owner: 'test-owner',
+      repo: 'test-repo',
+      comment_id: 42,
+      body: expect.stringContaining('Label Validation'),
+    })
+  })
+
+  it('should not post a comment when post-comment is disabled', async () => {
+    const mockListComments = vi.fn()
+    const mockOctokit = {
+      rest: {
+        pulls: {
+          get: vi.fn().mockResolvedValue({
+            data: { labels: [{ name: 'bug' }] },
+          }),
+        },
+        issues: {
+          listComments: mockListComments,
+        },
+      },
+    }
+
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return 'bug'
+      if (name === 'invalid-labels') return ''
+      if (name === 'pr-number') return '1'
+      if (name === 'post-comment') return 'false'
+      return ''
+    })
+
+    const github = await import('@actions/github')
+    vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
+
+    await run()
+
+    expect(mockListComments).not.toHaveBeenCalled()
+  })
 })
