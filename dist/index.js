@@ -31509,6 +31509,7 @@ var __webpack_exports__ = {};
 __nccwpck_require__.d(__webpack_exports__, {
   zl: () => (/* binding */ getPullRequestByNumber),
   MT: () => (/* binding */ matchesPattern),
+  pu: () => (/* binding */ postValidationComment),
   eF: () => (/* binding */ run),
   lk: () => (/* binding */ validatePullRequest)
 });
@@ -35636,6 +35637,7 @@ async function run() {
             ?.split(',')
             .map((label) => label.trim())
             .filter((label) => label) || [];
+        const postComment = core.getInput('post-comment').toLowerCase() === 'true';
         // Log the PR number, valid and invalid labels
         core.debug(`Pull request number: ${prNumber}`);
         core.info(`Valid labels are: ${JSON.stringify(validLabels)}`);
@@ -35651,6 +35653,10 @@ async function run() {
             core.setOutput('is-valid', result.isValid);
             core.setOutput('valid-labels-found', JSON.stringify(result.validLabels));
             core.setOutput('invalid-labels-found', JSON.stringify(result.invalidLabels));
+            // Post comment if enabled
+            if (postComment) {
+                await postValidationComment(octokit, context.repo.owner, context.repo.repo, prNumber, result, validLabels);
+            }
             // Fail if not valid
             if (!result.isValid) {
                 if (result.validLabels.length === 0) {
@@ -35715,6 +35721,49 @@ function validatePullRequest(pr, validLabels, invalidLabels) {
         invalidLabels: foundInvalidLabels,
     };
 }
+const COMMENT_HEADER = '### 🏷️ Label Validation';
+// Post or update a validation comment on the PR
+async function postValidationComment(octokit, owner, repo, prNumber, result, expectedLabels) {
+    const lines = [COMMENT_HEADER, ''];
+    if (result.isValid) {
+        lines.push(`✅ **Valid labels found:** ${result.validLabels.map((l) => `\`${l}\``).join(', ')}`);
+    }
+    else {
+        if (result.validLabels.length === 0) {
+            lines.push(`❌ **No valid labels found.** Expected one of: ${expectedLabels.map((l) => `\`${l}\``).join(', ')}`);
+        }
+        else {
+            lines.push(`✅ **Valid labels found:** ${result.validLabels.map((l) => `\`${l}\``).join(', ')}`);
+        }
+        if (result.invalidLabels.length > 0) {
+            lines.push(`❌ **Invalid labels found:** ${result.invalidLabels.map((l) => `\`${l}\``).join(', ')}`);
+        }
+    }
+    const body = lines.join('\n');
+    // Check for existing comment to update
+    const { data: comments } = await octokit.rest.issues.listComments({
+        owner,
+        repo,
+        issue_number: prNumber,
+    });
+    const existingComment = comments.find((comment) => comment.body?.startsWith(COMMENT_HEADER));
+    if (existingComment) {
+        await octokit.rest.issues.updateComment({
+            owner,
+            repo,
+            comment_id: existingComment.id,
+            body,
+        });
+    }
+    else {
+        await octokit.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: prNumber,
+            body,
+        });
+    }
+}
 // Run the action only if this is the main module
 if (import.meta.url === `file://${process.argv[1]}`) {
     run();
@@ -35722,6 +35771,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 var __webpack_exports__getPullRequestByNumber = __webpack_exports__.zl;
 var __webpack_exports__matchesPattern = __webpack_exports__.MT;
+var __webpack_exports__postValidationComment = __webpack_exports__.pu;
 var __webpack_exports__run = __webpack_exports__.eF;
 var __webpack_exports__validatePullRequest = __webpack_exports__.lk;
-export { __webpack_exports__getPullRequestByNumber as getPullRequestByNumber, __webpack_exports__matchesPattern as matchesPattern, __webpack_exports__run as run, __webpack_exports__validatePullRequest as validatePullRequest };
+export { __webpack_exports__getPullRequestByNumber as getPullRequestByNumber, __webpack_exports__matchesPattern as matchesPattern, __webpack_exports__postValidationComment as postValidationComment, __webpack_exports__run as run, __webpack_exports__validatePullRequest as validatePullRequest };

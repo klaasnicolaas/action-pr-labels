@@ -18,6 +18,7 @@ By specifying valid and/or invalid labels, this action ensures that pull request
 - **Detailed Error Messages**: Provides clear error messages when no valid labels are found or when invalid labels are detected, causing the action to fail.
 - **Outputs**: Exposes validation results as outputs (`is-valid`, `valid-labels-found`, `invalid-labels-found`) for use in subsequent workflow steps.
 - **Glob Pattern Support**: Labels support `*` wildcards for flexible matching (e.g., `type/*` matches `type/bug`, `scope-*` matches `scope-frontend`).
+- **PR Comment Feedback**: Optionally post a comment on the PR with validation results. Updates the existing comment on re-runs to keep the PR clean.
 - **Easy Configuration**: Labels can be easily configured through the action's [input parameters](#inputs).
 
 ## Inputs
@@ -50,6 +51,13 @@ A comma-separated list of valid labels that are allowed on the pull request. Sup
 A comma-separated list of invalid labels that are not allowed on the pull request. Also supports `*` wildcards.
 
 - Default: _None_
+- Usage: **Optional**
+
+### `post-comment`
+
+Post a comment on the pull request with the validation results. If a comment from a previous run already exists, it will be updated instead of creating a new one. Requires `pull-requests: write` permission.
+
+- Default: `false`
 - Usage: **Optional**
 
 ## Outputs
