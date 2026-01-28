@@ -1,18 +1,19 @@
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import * as core from '@actions/core'
-import { getPullRequestByNumber } from '../index'
-import { describe, expect, it, jest } from '@jest/globals'
+import { getPullRequestByNumber } from '../index.js'
 
-jest.mock('@actions/core')
-jest.mock('@actions/github')
-
-const mockCore = core as jest.Mocked<typeof core>
+vi.mock('@actions/core')
 
 describe('GitHub Action - getPullRequestByNumber', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('should return pull request details', async () => {
     const mockOctokit = {
       rest: {
         pulls: {
-          get: jest.fn().mockResolvedValue({ data: { number: 1 } } as never),
+          get: vi.fn().mockResolvedValue({ data: { number: 1 } }),
         },
       },
     }
@@ -31,7 +32,7 @@ describe('GitHub Action - getPullRequestByNumber', () => {
     const mockOctokit = {
       rest: {
         pulls: {
-          get: jest.fn().mockRejectedValue(new Error('API Error') as never),
+          get: vi.fn().mockRejectedValue(new Error('API Error')),
         },
       },
     }
@@ -44,7 +45,7 @@ describe('GitHub Action - getPullRequestByNumber', () => {
     )
 
     expect(pr).toBeUndefined()
-    expect(mockCore.error).toHaveBeenCalledWith(
+    expect(core.error).toHaveBeenCalledWith(
       'Error fetching pull request #1: Error: API Error',
     )
   })

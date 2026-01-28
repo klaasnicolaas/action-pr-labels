@@ -1,33 +1,26 @@
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import * as core from '@actions/core'
-import * as github from '@actions/github'
-import { getPullRequestByNumber, run } from '../index'
-import { RestEndpointMethodTypes } from '@octokit/rest'
-import { describe, expect, it, jest, beforeEach } from '@jest/globals'
+import { run } from '../index.js'
 
-type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
-
-jest.mock('@actions/core')
-jest.mock('@actions/github')
-
-const mockCore = core as jest.Mocked<typeof core>
-const mockGithub = github as jest.Mocked<typeof github>
+vi.mock('@actions/core')
+vi.mock('@actions/github', () => ({
+  context: {
+    repo: {
+      owner: 'test-owner',
+      repo: 'test-repo',
+    },
+    eventName: 'pull_request',
+  },
+  getOctokit: vi.fn(),
+}))
 
 describe('GitHub Action - run', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-
-    // Mock context.repo using Object.defineProperty
-    Object.defineProperty(mockGithub.context, 'repo', {
-      value: {
-        owner: 'test-owner',
-        repo: 'test-repo',
-      },
-      writable: true, // Ensure it can be modified
-    })
+    vi.clearAllMocks()
   })
 
   it('should log valid and invalid labels', async () => {
-    mockCore.getInput.mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name) => {
       if (name === 'repo-token') return 'fake-token'
       if (name === 'valid-labels') return 'bug,enhancement'
       if (name === 'invalid-labels') return 'wontfix'
@@ -35,26 +28,11 @@ describe('GitHub Action - run', () => {
       return ''
     })
 
-    mockGithub.context.eventName = 'pull_request'
-
-    const mockGetPullRequestByNumber = jest.fn() as jest.MockedFunction<
-      typeof getPullRequestByNumber
-    >
-
-    mockGetPullRequestByNumber.mockResolvedValue({
-      labels: [
-        { name: 'bug', color: 'ffffff' },
-        { name: 'wontfix', color: 'ff0000' },
-      ],
-    } as PullRequest)
-
     await run()
 
-    expect(mockCore.info).toHaveBeenCalledWith(
+    expect(core.info).toHaveBeenCalledWith(
       'Valid labels are: ["bug","enhancement"]',
     )
-    expect(mockCore.info).toHaveBeenCalledWith(
-      'Invalid labels are: ["wontfix"]',
-    )
+    expect(core.info).toHaveBeenCalledWith('Invalid labels are: ["wontfix"]')
   })
 })

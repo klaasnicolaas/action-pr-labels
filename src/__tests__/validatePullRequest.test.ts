@@ -1,17 +1,15 @@
-import * as core from '@actions/core'
-import { validatePullRequest } from '../index'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { RestEndpointMethodTypes } from '@octokit/rest'
-import { describe, expect, it, jest, beforeEach } from '@jest/globals'
+import * as core from '@actions/core'
+import { validatePullRequest } from '../index.js'
 
 type PullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
-jest.mock('@actions/core')
-
-const mockCore = core as jest.Mocked<typeof core>
+vi.mock('@actions/core')
 
 describe('GitHub Action - validatePullRequest', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should log success message when labels match valid labels', async () => {
@@ -21,10 +19,10 @@ describe('GitHub Action - validatePullRequest', () => {
 
     await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
-    expect(mockCore.info).toHaveBeenCalledWith(
+    expect(core.info).toHaveBeenCalledWith(
       expect.stringContaining('Valid labels found:'),
     )
-    expect(mockCore.info).toHaveBeenCalledWith(
+    expect(core.info).toHaveBeenCalledWith(
       'Labels from this PR match the expected labels',
     )
   })
@@ -36,13 +34,13 @@ describe('GitHub Action - validatePullRequest', () => {
 
     await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
-    expect(mockCore.info).toHaveBeenCalledWith(
+    expect(core.info).toHaveBeenCalledWith(
       expect.stringContaining('Valid labels found:'),
     )
-    expect(mockCore.setFailed).toHaveBeenCalledWith(
+    expect(core.setFailed).toHaveBeenCalledWith(
       expect.stringContaining('Invalid labels found:'),
     )
-    expect(mockCore.setFailed).toHaveBeenCalledWith(
+    expect(core.setFailed).toHaveBeenCalledWith(
       'Labels from this PR do not match the expected labels',
     )
   })
@@ -52,7 +50,7 @@ describe('GitHub Action - validatePullRequest', () => {
 
     await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
-    expect(mockCore.setFailed).toHaveBeenCalledWith(
+    expect(core.setFailed).toHaveBeenCalledWith(
       'No valid labels found. Expected one of: bug, enhancement',
     )
   })
@@ -62,13 +60,13 @@ describe('GitHub Action - validatePullRequest', () => {
 
     await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
-    expect(mockCore.setFailed).toHaveBeenCalledWith(
+    expect(core.setFailed).toHaveBeenCalledWith(
       'No valid labels found. Expected one of: bug, enhancement',
     )
-    expect(mockCore.setFailed).toHaveBeenCalledWith(
+    expect(core.setFailed).toHaveBeenCalledWith(
       expect.stringContaining('Invalid labels found:'),
     )
-    expect(mockCore.setFailed).toHaveBeenCalledWith(
+    expect(core.setFailed).toHaveBeenCalledWith(
       'Labels from this PR do not match the expected labels',
     )
   })
