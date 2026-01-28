@@ -31508,6 +31508,7 @@ var __webpack_exports__ = {};
 // EXPORTS
 __nccwpck_require__.d(__webpack_exports__, {
   zl: () => (/* binding */ getPullRequestByNumber),
+  MT: () => (/* binding */ matchesPattern),
   eF: () => (/* binding */ run),
   lk: () => (/* binding */ validatePullRequest)
 });
@@ -35610,6 +35611,20 @@ function getOctokit(token, options, ...additionalPlugins) {
 ;// CONCATENATED MODULE: ./dist/index.js
 
 
+/**
+ * Check if a label matches a glob pattern.
+ * Supports `*` as a wildcard that matches any characters.
+ * Examples: "type/*" matches "type/bug", "scope-*" matches "scope-frontend"
+ */
+function matchesPattern(label, pattern) {
+    const regexStr = pattern
+        .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+        .replace(/\*/g, '.*');
+    return new RegExp(`^${regexStr}$`).test(label);
+}
+function matchesAnyPattern(label, patterns) {
+    return patterns.some((pattern) => matchesPattern(label, pattern));
+}
 async function run() {
     try {
         const token = core.getInput('repo-token', { required: true });
@@ -35681,10 +35696,10 @@ function validatePullRequest(pr, validLabels, invalidLabels) {
     const foundValidLabels = [];
     const foundInvalidLabels = [];
     prLabels.forEach((label) => {
-        if (validLabels.includes(label.name)) {
+        if (matchesAnyPattern(label.name, validLabels)) {
             foundValidLabels.push(label.name);
         }
-        else if (invalidLabels.includes(label.name)) {
+        else if (matchesAnyPattern(label.name, invalidLabels)) {
             foundInvalidLabels.push(label.name);
         }
     });
@@ -35706,6 +35721,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 var __webpack_exports__getPullRequestByNumber = __webpack_exports__.zl;
+var __webpack_exports__matchesPattern = __webpack_exports__.MT;
 var __webpack_exports__run = __webpack_exports__.eF;
 var __webpack_exports__validatePullRequest = __webpack_exports__.lk;
-export { __webpack_exports__getPullRequestByNumber as getPullRequestByNumber, __webpack_exports__run as run, __webpack_exports__validatePullRequest as validatePullRequest };
+export { __webpack_exports__getPullRequestByNumber as getPullRequestByNumber, __webpack_exports__matchesPattern as matchesPattern, __webpack_exports__run as run, __webpack_exports__validatePullRequest as validatePullRequest };
