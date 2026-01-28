@@ -3,6 +3,7 @@
   "description": "Check if a Pull Request has valid labels",
   "version": "0.0.0",
   "license": "Apache-2.0",
+  "type": "module",
   "main": "dist/index.js",
   "engines": {
     "node": ">=22.0.0"
@@ -13,7 +14,9 @@
     "format:check": "prettier --check src/**/*.ts",
     "format:fix": "prettier --write src/**/*.ts",
     "typing:check": "tsc --noEmit",
-    "test": "jest tests",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "prepare": "husky"
   },
   "repository": {
@@ -30,40 +33,18 @@
     "github",
     "labels"
   ],
-  "jest": {
-    "collectCoverage": true,
-    "coverageReporters": [
-      "json",
-      "text"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.ts"
-    ],
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/__tests__/"
-    ],
-    "transformIgnorePatterns": [
-      "/node_modules/(?!chalk).+\\.js$"
-    ]
-  },
   "dependencies": {
     "@actions/core": "^2.0.0",
-    "@actions/github": "^7.0.0",
+    "@actions/github": "^9.0.0",
     "@octokit/rest": "^22.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.7",
-    "@babel/preset-env": "^7.24.7",
-    "@babel/preset-typescript": "^7.24.7",
-    "@jest/globals": "^30.0.0",
-    "@types/jest": "^30.0.0",
     "@vercel/ncc": "^0.38.1",
-    "babel-jest": "^30.0.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "husky": "^9.0.11",
-    "jest": "^30.0.0",
     "prettier": "^3.3.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.2",
+    "vitest": "^4.0.18"
   }
 }
