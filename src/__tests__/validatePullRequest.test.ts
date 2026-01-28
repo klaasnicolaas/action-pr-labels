@@ -12,62 +12,50 @@ describe('GitHub Action - validatePullRequest', () => {
     vi.clearAllMocks()
   })
 
-  it('should log success message when labels match valid labels', async () => {
+  it('should return valid result when labels match valid labels', () => {
     const pr = {
       labels: [{ name: 'bug' }, { name: 'enhancement' }],
     } as PullRequest
 
-    await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
+    const result = validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
+    expect(result.isValid).toBe(true)
+    expect(result.validLabels).toEqual(['bug', 'enhancement'])
+    expect(result.invalidLabels).toEqual([])
     expect(core.info).toHaveBeenCalledWith(
       expect.stringContaining('Valid labels found:'),
     )
-    expect(core.info).toHaveBeenCalledWith(
-      'Labels from this PR match the expected labels',
-    )
   })
 
-  it('should log success message even if some labels are invalid', async () => {
+  it('should return invalid result when invalid labels are present', () => {
     const pr = {
       labels: [{ name: 'bug' }, { name: 'wontfix' }],
     } as PullRequest
 
-    await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
+    const result = validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
-    expect(core.info).toHaveBeenCalledWith(
-      expect.stringContaining('Valid labels found:'),
-    )
-    expect(core.setFailed).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid labels found:'),
-    )
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'Labels from this PR do not match the expected labels',
-    )
+    expect(result.isValid).toBe(false)
+    expect(result.validLabels).toEqual(['bug'])
+    expect(result.invalidLabels).toEqual(['wontfix'])
   })
 
-  it('should log failure message if no valid labels are found', async () => {
+  it('should return invalid result when no valid labels are found', () => {
     const pr = { labels: [{ name: 'feature' }] } as PullRequest
 
-    await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
+    const result = validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'No valid labels found. Expected one of: bug, enhancement',
-    )
+    expect(result.isValid).toBe(false)
+    expect(result.validLabels).toEqual([])
+    expect(result.invalidLabels).toEqual([])
   })
 
-  it('should log failure message if only invalid labels are found', async () => {
+  it('should return invalid result when only invalid labels are found', () => {
     const pr = { labels: [{ name: 'wontfix' }] } as PullRequest
 
-    await validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
+    const result = validatePullRequest(pr, ['bug', 'enhancement'], ['wontfix'])
 
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'No valid labels found. Expected one of: bug, enhancement',
-    )
-    expect(core.setFailed).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid labels found:'),
-    )
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'Labels from this PR do not match the expected labels',
-    )
+    expect(result.isValid).toBe(false)
+    expect(result.validLabels).toEqual([])
+    expect(result.invalidLabels).toEqual(['wontfix'])
   })
 })

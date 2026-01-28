@@ -23,6 +23,14 @@ inputs:
     required: false
     default: ""
 
+outputs:
+  is-valid:
+    description: "Whether the PR labels passed validation (true/false)"
+  valid-labels-found:
+    description: "JSON array of valid labels found on the PR"
+  invalid-labels-found:
+    description: "JSON array of invalid labels found on the PR"
+
 runs:
   using: "node24"
   main: "dist/index.js"

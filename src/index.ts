@@ -9,6 +9,12 @@ interface Label {
   name: string
 }
 
+export interface ValidationResult {
+  isValid: boolean
+  validLabels: string[]
+  invalidLabels: string[]
+}
+
 export async function run(): Promise<void> {
   try {
     const token = core.getInput('repo-token', { required: true })
@@ -41,7 +47,25 @@ export async function run(): Promise<void> {
 
     if (pr) {
       core.info(`Validating labels for pull request #${prNumber}`)
-      await validatePullRequest(pr, validLabels, invalidLabels)
+      const result = validatePullRequest(pr, validLabels, invalidLabels)
+
+      // Set outputs
+      core.setOutput('is-valid', result.isValid)
+      core.setOutput('valid-labels-found', JSON.stringify(result.validLabels))
+      core.setOutput('invalid-labels-found', JSON.stringify(result.invalidLabels))
+
+      // Fail if not valid
+      if (!result.isValid) {
+        if (result.validLabels.length === 0) {
+          core.setFailed(`No valid labels found. Expected one of: ${validLabels.join(', ')}`)
+        }
+        if (result.invalidLabels.length > 0) {
+          core.setFailed(`Invalid labels found: ${JSON.stringify(result.invalidLabels)}`)
+        }
+        core.setFailed('Labels from this PR do not match the expected labels')
+      } else {
+        core.info('Labels from this PR match the expected labels')
+      }
     } else {
       core.setFailed('Error: Pull request not found')
     }
@@ -71,45 +95,37 @@ export async function getPullRequestByNumber(
 }
 
 // Validate pull request labels
-export async function validatePullRequest(
+export function validatePullRequest(
   pr: PullRequest,
   validLabels: string[],
   invalidLabels: string[],
-): Promise<void> {
+): ValidationResult {
   const prLabels: Label[] = pr.labels.map((label: PullRequestLabel) => ({
     name: label.name,
   }))
 
-  // Prepare arrays for valid and invalid labels
-  const prValidLabels: Label[] = []
-  const prInvalidLabels: Label[] = []
+  const foundValidLabels: string[] = []
+  const foundInvalidLabels: string[] = []
 
-  // Check validity of each label
   prLabels.forEach((label) => {
     if (validLabels.includes(label.name)) {
-      prValidLabels.push(label)
+      foundValidLabels.push(label.name)
     } else if (invalidLabels.includes(label.name)) {
-      prInvalidLabels.push(label)
+      foundInvalidLabels.push(label.name)
     }
   })
 
-  // Log valid labels
-  if (prValidLabels.length > 0) {
-    core.info(`Valid labels found: ${JSON.stringify(prValidLabels.map((l) => l.name))}`)
-  } else {
-    core.setFailed(`No valid labels found. Expected one of: ${validLabels.join(', ')}`)
+  if (foundValidLabels.length > 0) {
+    core.info(`Valid labels found: ${JSON.stringify(foundValidLabels)}`)
+  }
+  if (foundInvalidLabels.length > 0) {
+    core.info(`Invalid labels found: ${JSON.stringify(foundInvalidLabels)}`)
   }
 
-  // Log invalid labels
-  if (prInvalidLabels.length > 0) {
-    core.setFailed(`Invalid labels found: ${JSON.stringify(prInvalidLabels.map((l) => l.name))}`)
-  }
-
-  // Final check
-  if (prInvalidLabels.length === 0 && prValidLabels.length > 0) {
-    core.info('Labels from this PR match the expected labels')
-  } else {
-    core.setFailed('Labels from this PR do not match the expected labels')
+  return {
+    isValid: foundValidLabels.length > 0 && foundInvalidLabels.length === 0,
+    validLabels: foundValidLabels,
+    invalidLabels: foundInvalidLabels,
   }
 }
 

@@ -16,6 +16,7 @@ By specifying valid and/or invalid labels, this action ensures that pull request
 
 - **Label Validation**: Ensures that a pull request has at least one valid label and no invalid labels.
 - **Detailed Error Messages**: Provides clear error messages when no valid labels are found or when invalid labels are detected, causing the action to fail.
+- **Outputs**: Exposes validation results as outputs (`is-valid`, `valid-labels-found`, `invalid-labels-found`) for use in subsequent workflow steps.
 - **Easy Configuration**: Labels can be easily configured through the action's [input parameters](#inputs).
 
 ## Inputs
@@ -52,7 +53,27 @@ A comma-separated list of invalid labels that are not allowed on the pull reques
 
 ## Outputs
 
-_None. This action does not set any outputs._
+The following outputs can be used in subsequent workflow steps.
+
+### `is-valid`
+
+A boolean indicating whether the pull request labels passed validation.
+
+### `valid-labels-found`
+
+A JSON array of valid labels found on the pull request.
+
+```javascript
+["bug", "enhancement"]
+```
+
+### `invalid-labels-found`
+
+A JSON array of invalid labels found on the pull request.
+
+```javascript
+["duplicate", "invalid"]
+```
 
 ## Example workflow
 
@@ -101,6 +122,7 @@ jobs:
     steps:
       - name: 🏷 Verify PR has a valid label
         uses: klaasnicolaas/action-pr-labels@v1
+        id: labels
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           pr-number: ${{ github.event.pull_request.number }}
@@ -108,6 +130,11 @@ jobs:
             breaking-change, bugfix, documentation, enhancement
           invalid-labels: >-
             duplicate, invalid
+      - name: 🔍 Display validation results
+        run: |
+          echo "Valid: ${{ steps.labels.outputs.is-valid }}"
+          echo "Valid labels: ${{ steps.labels.outputs.valid-labels-found }}"
+          echo "Invalid labels: ${{ steps.labels.outputs.invalid-labels-found }}"
 ```
 
 ## Contributing

@@ -1,4 +1,13 @@
 # .husky/pre-commit.sh
+staged_src_files=$(git diff --cached --name-only -- src/)
+if [ -n "$staged_src_files" ]; then
+  npx prettier --write $staged_src_files
+  if ! git diff --quiet -- $staged_src_files; then
+    echo "Formatting issues fixed. Please review and stage the changes, then commit again."
+    exit 1
+  fi
+fi
+
 npm test
 
 # Check for staged changes in src and dist directories
