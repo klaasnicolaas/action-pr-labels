@@ -91,7 +91,10 @@ describe('GitHub Action - run', () => {
 
     expect(core.setOutput).toHaveBeenCalledWith('is-valid', false)
     expect(core.setOutput).toHaveBeenCalledWith('valid-labels-found', '[]')
-    expect(core.setOutput).toHaveBeenCalledWith('invalid-labels-found', '["wontfix"]')
+    expect(core.setOutput).toHaveBeenCalledWith(
+      'invalid-labels-found',
+      '["wontfix"]',
+    )
     expect(core.setFailed).toHaveBeenCalledWith(
       expect.stringContaining('do not match the expected labels'),
     )
