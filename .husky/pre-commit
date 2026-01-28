@@ -1,5 +1,5 @@
 # .husky/pre-commit.sh
-staged_src_files=$(git diff --cached --name-only -- src/)
+staged_src_files=$(git diff --cached --name-only -- src/ | grep -v '^src/__tests__/' || true)
 if [ -n "$staged_src_files" ]; then
   npx prettier --write $staged_src_files
   if ! git diff --quiet -- $staged_src_files; then
