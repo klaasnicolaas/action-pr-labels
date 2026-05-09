@@ -15,6 +15,23 @@ export interface ValidationResult {
   invalidLabels: string[]
 }
 
+function parseLabelList(input: string): string[] {
+  return input
+    .split(',')
+    .map((label) => label.trim())
+    .filter((label) => label)
+}
+
+function parsePullRequestNumber(input: string): number {
+  const prNumber = Number(input)
+
+  if (!Number.isInteger(prNumber) || prNumber < 1) {
+    throw new Error(`Invalid pull request number: ${input}`)
+  }
+
+  return prNumber
+}
+
 /**
  * Check if a label matches a glob pattern.
  * Supports `*` as a wildcard that matches any characters.
@@ -34,21 +51,18 @@ function matchesAnyPattern(label: string, patterns: string[]): boolean {
 export async function run(): Promise<void> {
   try {
     const token = core.getInput('repo-token', { required: true })
-    const prNumber = parseInt(
+    const prNumber = parsePullRequestNumber(
       core.getInput('pr-number', { required: true }),
-      10,
     )
-    const validLabels = core
-      .getInput('valid-labels', { required: true })
-      .split(',')
-      .map((label) => label.trim())
-    const invalidLabels =
-      core
-        .getInput('invalid-labels')
-        ?.split(',')
-        .map((label) => label.trim())
-        .filter((label) => label) || []
-    const postComment = core.getInput('post-comment').toLowerCase() === 'true'
+    const validLabels = parseLabelList(
+      core.getInput('valid-labels', { required: true }),
+    )
+    const invalidLabels = parseLabelList(core.getInput('invalid-labels'))
+    const postComment = core.getBooleanInput('post-comment')
+
+    if (validLabels.length === 0) {
+      throw new Error('valid-labels must contain at least one non-empty label')
+    }
 
     // Log the PR number, valid and invalid labels
     core.debug(`Pull request number: ${prNumber}`)
@@ -152,7 +166,8 @@ export function validatePullRequest(
   prLabels.forEach((label) => {
     if (matchesAnyPattern(label.name, validLabels)) {
       foundValidLabels.push(label.name)
-    } else if (matchesAnyPattern(label.name, invalidLabels)) {
+    }
+    if (matchesAnyPattern(label.name, invalidLabels)) {
       foundInvalidLabels.push(label.name)
     }
   })
@@ -171,6 +186,7 @@ export function validatePullRequest(
   }
 }
 
+const COMMENT_MARKER = '<!-- action-pr-labels -->'
 const COMMENT_HEADER = '### 🏷️ Label Validation'
 
 // Post or update a validation comment on the PR
@@ -182,7 +198,7 @@ export async function postValidationComment(
   result: ValidationResult,
   expectedLabels: string[],
 ): Promise<void> {
-  const lines: string[] = [COMMENT_HEADER, '']
+  const lines: string[] = [COMMENT_MARKER, COMMENT_HEADER, '']
 
   if (result.isValid) {
     lines.push(
@@ -208,14 +224,17 @@ export async function postValidationComment(
   const body = lines.join('\n')
 
   // Check for existing comment to update
-  const { data: comments } = await octokit.rest.issues.listComments({
+  const comments = await octokit.paginate(octokit.rest.issues.listComments, {
     owner,
     repo,
     issue_number: prNumber,
+    per_page: 100,
   })
 
-  const existingComment = comments.find((comment) =>
-    comment.body?.startsWith(COMMENT_HEADER),
+  const existingComment = comments.find(
+    (comment) =>
+      comment.body?.includes(COMMENT_MARKER) ||
+      comment.body?.startsWith(COMMENT_HEADER),
   )
 
   if (existingComment) {
@@ -235,4 +254,6 @@ export async function postValidationComment(
   }
 }
 
-run()
+if (process.env.NODE_ENV !== 'test') {
+  run()
+}

@@ -39,6 +39,18 @@ describe('GitHub Action - validatePullRequest', () => {
     expect(result.invalidLabels).toEqual(['wontfix'])
   })
 
+  it('should return invalid result when a label matches valid and invalid patterns', () => {
+    const pr = {
+      labels: [{ name: 'bug' }],
+    } as PullRequest
+
+    const result = validatePullRequest(pr, ['bug'], ['*'])
+
+    expect(result.isValid).toBe(false)
+    expect(result.validLabels).toEqual(['bug'])
+    expect(result.invalidLabels).toEqual(['bug'])
+  })
+
   it('should return invalid result when no valid labels are found', () => {
     const pr = { labels: [{ name: 'feature' }] } as PullRequest
 

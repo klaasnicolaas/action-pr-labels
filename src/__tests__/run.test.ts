@@ -17,13 +17,14 @@ vi.mock('@actions/github', () => ({
 describe('GitHub Action - run', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(core.getBooleanInput).mockReturnValue(false)
   })
 
   it('should log valid and invalid labels', async () => {
     vi.mocked(core.getInput).mockImplementation((name) => {
       if (name === 'repo-token') return 'fake-token'
-      if (name === 'valid-labels') return 'bug,enhancement'
-      if (name === 'invalid-labels') return 'wontfix'
+      if (name === 'valid-labels') return 'bug, enhancement, '
+      if (name === 'invalid-labels') return 'wontfix, '
       if (name === 'pr-number') return '1'
       return ''
     })
@@ -34,6 +35,38 @@ describe('GitHub Action - run', () => {
       'Valid labels are: ["bug","enhancement"]',
     )
     expect(core.info).toHaveBeenCalledWith('Invalid labels are: ["wontfix"]')
+  })
+
+  it('should fail when the pull request number is invalid', async () => {
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return 'bug'
+      if (name === 'invalid-labels') return ''
+      if (name === 'pr-number') return 'abc'
+      return ''
+    })
+
+    await run()
+
+    expect(core.setFailed).toHaveBeenCalledWith(
+      'Error: Invalid pull request number: abc',
+    )
+  })
+
+  it('should fail when no valid labels are configured', async () => {
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return ' , '
+      if (name === 'invalid-labels') return ''
+      if (name === 'pr-number') return '1'
+      return ''
+    })
+
+    await run()
+
+    expect(core.setFailed).toHaveBeenCalledWith(
+      'Error: valid-labels must contain at least one non-empty label',
+    )
   })
 
   it('should set outputs after successful validation', async () => {
@@ -102,8 +135,9 @@ describe('GitHub Action - run', () => {
 
   it('should create a comment when post-comment is enabled', async () => {
     const mockCreateComment = vi.fn()
-    const mockListComments = vi.fn().mockResolvedValue({ data: [] })
+    const mockListComments = vi.fn()
     const mockOctokit = {
+      paginate: vi.fn().mockResolvedValue([]),
       rest: {
         pulls: {
           get: vi.fn().mockResolvedValue({
@@ -122,34 +156,38 @@ describe('GitHub Action - run', () => {
       if (name === 'valid-labels') return 'bug,enhancement'
       if (name === 'invalid-labels') return ''
       if (name === 'pr-number') return '1'
-      if (name === 'post-comment') return 'true'
       return ''
     })
+    vi.mocked(core.getBooleanInput).mockReturnValue(true)
 
     const github = await import('@actions/github')
     vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
 
     await run()
 
-    expect(mockListComments).toHaveBeenCalledWith({
+    expect(mockOctokit.paginate).toHaveBeenCalledWith(mockListComments, {
       owner: 'test-owner',
       repo: 'test-repo',
       issue_number: 1,
+      per_page: 100,
     })
     expect(mockCreateComment).toHaveBeenCalledWith({
       owner: 'test-owner',
       repo: 'test-repo',
       issue_number: 1,
-      body: expect.stringContaining('Label Validation'),
+      body: expect.stringContaining('<!-- action-pr-labels -->'),
     })
   })
 
   it('should update existing comment when one already exists', async () => {
     const mockUpdateComment = vi.fn()
-    const mockListComments = vi.fn().mockResolvedValue({
-      data: [{ id: 42, body: '### 🏷️ Label Validation\n\nOld content' }],
-    })
+    const mockListComments = vi.fn()
     const mockOctokit = {
+      paginate: vi
+        .fn()
+        .mockResolvedValue([
+          { id: 42, body: '### 🏷️ Label Validation\n\nOld content' },
+        ]),
       rest: {
         pulls: {
           get: vi.fn().mockResolvedValue({
@@ -168,9 +206,9 @@ describe('GitHub Action - run', () => {
       if (name === 'valid-labels') return 'bug'
       if (name === 'invalid-labels') return ''
       if (name === 'pr-number') return '1'
-      if (name === 'post-comment') return 'true'
       return ''
     })
+    vi.mocked(core.getBooleanInput).mockReturnValue(true)
 
     const github = await import('@actions/github')
     vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
@@ -188,6 +226,7 @@ describe('GitHub Action - run', () => {
   it('should not post a comment when post-comment is disabled', async () => {
     const mockListComments = vi.fn()
     const mockOctokit = {
+      paginate: vi.fn(),
       rest: {
         pulls: {
           get: vi.fn().mockResolvedValue({
@@ -205,7 +244,6 @@ describe('GitHub Action - run', () => {
       if (name === 'valid-labels') return 'bug'
       if (name === 'invalid-labels') return ''
       if (name === 'pr-number') return '1'
-      if (name === 'post-comment') return 'false'
       return ''
     })
 
@@ -215,12 +253,14 @@ describe('GitHub Action - run', () => {
     await run()
 
     expect(mockListComments).not.toHaveBeenCalled()
+    expect(mockOctokit.paginate).not.toHaveBeenCalled()
   })
 
   it('should post comment when no valid labels are found', async () => {
     const mockCreateComment = vi.fn()
-    const mockListComments = vi.fn().mockResolvedValue({ data: [] })
+    const mockListComments = vi.fn()
     const mockOctokit = {
+      paginate: vi.fn().mockResolvedValue([]),
       rest: {
         pulls: {
           get: vi.fn().mockResolvedValue({
@@ -239,9 +279,9 @@ describe('GitHub Action - run', () => {
       if (name === 'valid-labels') return 'bug,enhancement'
       if (name === 'invalid-labels') return ''
       if (name === 'pr-number') return '1'
-      if (name === 'post-comment') return 'true'
       return ''
     })
+    vi.mocked(core.getBooleanInput).mockReturnValue(true)
 
     const github = await import('@actions/github')
     vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
@@ -258,8 +298,9 @@ describe('GitHub Action - run', () => {
 
   it('should post comment when invalid labels are found', async () => {
     const mockCreateComment = vi.fn()
-    const mockListComments = vi.fn().mockResolvedValue({ data: [] })
+    const mockListComments = vi.fn()
     const mockOctokit = {
+      paginate: vi.fn().mockResolvedValue([]),
       rest: {
         pulls: {
           get: vi.fn().mockResolvedValue({
@@ -278,9 +319,9 @@ describe('GitHub Action - run', () => {
       if (name === 'valid-labels') return 'bug,enhancement'
       if (name === 'invalid-labels') return 'wontfix'
       if (name === 'pr-number') return '1'
-      if (name === 'post-comment') return 'true'
       return ''
     })
+    vi.mocked(core.getBooleanInput).mockReturnValue(true)
 
     const github = await import('@actions/github')
     vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
@@ -297,8 +338,9 @@ describe('GitHub Action - run', () => {
 
   it('should post comment with mixed valid and invalid labels', async () => {
     const mockCreateComment = vi.fn()
-    const mockListComments = vi.fn().mockResolvedValue({ data: [] })
+    const mockListComments = vi.fn()
     const mockOctokit = {
+      paginate: vi.fn().mockResolvedValue([]),
       rest: {
         pulls: {
           get: vi.fn().mockResolvedValue({
@@ -317,9 +359,9 @@ describe('GitHub Action - run', () => {
       if (name === 'valid-labels') return 'bug,enhancement'
       if (name === 'invalid-labels') return 'wontfix'
       if (name === 'pr-number') return '1'
-      if (name === 'post-comment') return 'true'
       return ''
     })
+    vi.mocked(core.getBooleanInput).mockReturnValue(true)
 
     const github = await import('@actions/github')
     vi.mocked(github.getOctokit).mockReturnValue(mockOctokit as any)
