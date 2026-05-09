@@ -28,7 +28,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/tunnel/lib/tunnel.js
 var require_tunnel = __commonJS({
@@ -19501,17 +19500,6 @@ var require_fast_content_type_parse = __commonJS({
   }
 });
 
-// src/index.ts
-var index_exports = {};
-__export(index_exports, {
-  getPullRequestByNumber: () => getPullRequestByNumber,
-  matchesPattern: () => matchesPattern,
-  postValidationComment: () => postValidationComment,
-  run: () => run,
-  validatePullRequest: () => validatePullRequest
-});
-module.exports = __toCommonJS(index_exports);
-
 // node_modules/@actions/core/lib/command.js
 var os = __toESM(require("os"), 1);
 
@@ -23775,8 +23763,11 @@ function parseLabelList(input) {
   return input.split(",").map((label) => label.trim()).filter((label) => label);
 }
 function parsePullRequestNumber(input) {
+  if (!/^\d+$/.test(input)) {
+    throw new Error(`Invalid pull request number: ${input}`);
+  }
   const prNumber = Number(input);
-  if (!Number.isInteger(prNumber) || prNumber < 1) {
+  if (!Number.isSafeInteger(prNumber) || prNumber < 1) {
     throw new Error(`Invalid pull request number: ${input}`);
   }
   return prNumber;
@@ -23946,17 +23937,9 @@ async function postValidationComment(octokit, owner, repo, prNumber, result, exp
     });
   }
 }
-if (process.env.NODE_ENV !== "test") {
-  run();
-}
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  getPullRequestByNumber,
-  matchesPattern,
-  postValidationComment,
-  run,
-  validatePullRequest
-});
+
+// src/main.ts
+void run();
 /*! Bundled license information:
 
 undici/lib/web/fetch/body.js:

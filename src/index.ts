@@ -23,9 +23,13 @@ function parseLabelList(input: string): string[] {
 }
 
 function parsePullRequestNumber(input: string): number {
+  if (!/^\d+$/.test(input)) {
+    throw new Error(`Invalid pull request number: ${input}`)
+  }
+
   const prNumber = Number(input)
 
-  if (!Number.isInteger(prNumber) || prNumber < 1) {
+  if (!Number.isSafeInteger(prNumber) || prNumber < 1) {
     throw new Error(`Invalid pull request number: ${input}`)
   }
 
@@ -252,8 +256,4 @@ export async function postValidationComment(
       body,
     })
   }
-}
-
-if (process.env.NODE_ENV !== 'test') {
-  run()
 }

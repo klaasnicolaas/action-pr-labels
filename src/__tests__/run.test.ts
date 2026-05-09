@@ -53,6 +53,41 @@ describe('GitHub Action - run', () => {
     )
   })
 
+  it.each(['1e2', '1.0'])(
+    'should fail when the pull request number uses a non-decimal format: %s',
+    async (prNumber) => {
+      vi.mocked(core.getInput).mockImplementation((name) => {
+        if (name === 'repo-token') return 'fake-token'
+        if (name === 'valid-labels') return 'bug'
+        if (name === 'invalid-labels') return ''
+        if (name === 'pr-number') return prNumber
+        return ''
+      })
+
+      await run()
+
+      expect(core.setFailed).toHaveBeenCalledWith(
+        `Error: Invalid pull request number: ${prNumber}`,
+      )
+    },
+  )
+
+  it('should fail when the pull request number is out of range', async () => {
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      if (name === 'repo-token') return 'fake-token'
+      if (name === 'valid-labels') return 'bug'
+      if (name === 'invalid-labels') return ''
+      if (name === 'pr-number') return '0'
+      return ''
+    })
+
+    await run()
+
+    expect(core.setFailed).toHaveBeenCalledWith(
+      'Error: Invalid pull request number: 0',
+    )
+  })
+
   it('should fail when no valid labels are configured', async () => {
     vi.mocked(core.getInput).mockImplementation((name) => {
       if (name === 'repo-token') return 'fake-token'
