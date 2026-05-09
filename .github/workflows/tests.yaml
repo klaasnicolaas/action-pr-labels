@@ -7,7 +7,27 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  DEFAULT_NODE: 24
+
 jobs:
+  build:
+    name: Build action
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v6.0.2
+      - name: 🏗 Set up Node.js ${{ env.DEFAULT_NODE }}
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: ${{ env.DEFAULT_NODE }}
+      - name: 🏗 Install dependencies
+        run: npm ci
+      - name: 🏗 Build action
+        run: npm run build
+      - name: 🔍 Verify committed build output
+        run: git diff --exit-code -- dist/index.cjs dist/package.json
+
   vitest:
     name: Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest

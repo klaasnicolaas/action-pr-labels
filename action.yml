@@ -1,6 +1,6 @@
 name: "PR Labels Check"
 author: "Klaas Schoute <hello@student-techlife.com>"
-description: "Github Action to manage labels on Pull Requests"
+description: "GitHub Action to validate labels on Pull Requests"
 
 branding:
   icon: "check-circle"
@@ -8,7 +8,7 @@ branding:
 
 inputs:
   repo-token:
-    description: "Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`."
+    description: "Token for the repository. Defaults to the workflow GitHub token."
     required: false
     default: ${{ github.token }}
   pr-number:

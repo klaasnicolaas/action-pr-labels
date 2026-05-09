@@ -10,7 +10,7 @@
   },
   "author": "Klaas Schoute <hello@student-techlife.com>",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --format=cjs",
+    "build": "esbuild src/main.ts --bundle --platform=node --outfile=dist/index.cjs --format=cjs",
     "format:check": "prettier --check src/**/*.ts",
     "format:fix": "prettier --write src/**/*.ts",
     "typing:check": "tsc --noEmit",

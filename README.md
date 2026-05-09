@@ -146,6 +146,35 @@ jobs:
           echo "Invalid labels: ${{ steps.labels.outputs.invalid-labels-found }}"
 ```
 
+## Comment workflow example
+
+For the default read-only label validation, use `pull_request` with `pull-requests: read`. Enable `post-comment` only when the workflow is allowed to write pull request comments.
+
+For pull requests from forks, GitHub restricts the `GITHUB_TOKEN` on `pull_request` workflows to read-only permissions. If you need comments on forked pull requests, use `pull_request_target` only in a trusted workflow that does not check out or run untrusted pull request code.
+
+```yaml
+name: PR Label Comments
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+
+jobs:
+  validate:
+    name: Verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: 🏷 Verify PR has a valid label
+        uses: klaasnicolaas/action-pr-labels@v1
+        with:
+          valid-labels: >-
+            breaking-change, bugfix, documentation, enhancement
+          post-comment: true
+```
+
 ## Contributing
 
 This is an active open-source project. We are always open to people who want to
