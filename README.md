@@ -92,7 +92,7 @@ This example workflows demonstrates a minimal configuration to validate pull req
 name: PR Labels
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
@@ -118,7 +118,7 @@ This example workflow demonstrates a full example configuration to validate pull
 name: PR Labels
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
