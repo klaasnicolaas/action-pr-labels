@@ -1,64 +1,68 @@
 ---
 name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
-change-template: "- #$NUMBER $TITLE @$AUTHOR"
+change-template: "- [#$NUMBER]($URL) $TITLE @$AUTHOR"
+change-title-escapes: '\<*_&`'
 sort-direction: ascending
 
 categories:
   - title: "🚨 Breaking changes"
-    labels:
-      - "breaking-change"
+    exclusive: true
+    semver-increment: major
+    when:
+      label: "breaking-change"
+  - title: "🔒 Security"
+    exclusive: true
+    when:
+      label: "security"
   - title: "✨ New features"
-    labels:
-      - "new-feature"
+    exclusive: true
+    semver-increment: minor
+    when:
+      label: "new-feature"
   - title: "🐛 Bug fixes"
-    labels:
-      - "bugfix"
+    exclusive: true
+    when:
+      label: "bugfix"
   - title: "🚀 Enhancements"
-    labels:
-      - "enhancement"
-      - "refactor"
-      - "performance"
-  - title: "🧰 Maintenance"
-    labels:
-      - "maintenance"
-      - "ci"
+    exclusive: true
+    when:
+      labels:
+        - "enhancement"
+        - "refactor"
+        - "performance"
   - title: "📚 Documentation"
-    labels:
-      - "documentation"
+    exclusive: true
+    when:
+      label: "documentation"
+  - title: "🧰 Maintenance"
+    exclusive: true
+    when:
+      labels:
+        - "maintenance"
+        - "ci"
   - title: "⬆️ Dependency updates"
     collapse-after: 5
-    labels:
-      - "dependencies"
+    exclusive: true
+    when:
+      label: "dependencies"
+  - type: version-resolver
+    semver-increment: major
+    when:
+      label: "major"
+  - type: version-resolver
+    semver-increment: minor
+    when:
+      label: "minor"
+  - type: version-resolver
+    semver-increment: patch
+  - type: pre-exclude
+    when:
+      label: "sync"
 
-exclude-labels:
-  - "sync"
-
-version-resolver:
-  major:
-    labels:
-      - "major"
-      - "breaking-change"
-  minor:
-    labels:
-      - "minor"
-      - "new-feature"
-  patch:
-    labels:
-      - "bugfix"
-      - "chore"
-      - "ci"
-      - "dependencies"
-      - "documentation"
-      - "enhancement"
-      - "performance"
-      - "refactor"
-  default: patch
-
+# yamllint disable rule:line-length
 template: |
   ## What's changed
-
-  _To receive a notification on new releases, click on **Watch** > **Custom** > **Releases** on the top._
 
   $CHANGES
 
