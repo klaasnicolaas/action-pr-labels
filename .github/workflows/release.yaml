@@ -1,0 +1,65 @@
+---
+name: Release
+
+# yamllint disable-line rule:truthy
+on:
+  release:
+    types: [published]
+
+jobs:
+  validate-release:
+    name: 🔍 Validate release bundle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: ⤵️ Check out released code
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: 🔍 Verify packaged entry point
+        run: git ls-files --error-unmatch dist/index.cjs
+      - name: 🏗 Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: 🏗 Install dependencies
+        run: npm ci
+      - name: 🚀 Run tests
+        run: npm test
+      - name: 🏗 Build release bundle
+        run: npm run build
+      - name: 🔍 Verify committed release bundle
+        run: git diff --exit-code -- dist/
+
+  update-version-tags:
+    name: 🏷️ Update moving Action tags
+    needs: validate-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: ⤵️ Check out released code
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - name: Update major and minor version tags
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+)\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Skipping moving tag updates for non-stable release: $RELEASE_TAG"
+            exit 0
+          fi
+
+          major_tag="${RELEASE_TAG%%.*}"
+          minor_tag="${RELEASE_TAG%.*}"
+          release_sha="$(git rev-parse HEAD)"
+
+          for version_tag in "$major_tag" "$minor_tag"; do
+            git tag --force "$version_tag" "$release_sha"
+            git push origin "refs/tags/$version_tag" --force
+          done

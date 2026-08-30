@@ -1,18 +1,41 @@
-## 🏷️ PR Label Checker
+<p align="center">
+  <picture>
+    <img alt="PR Label Checker" src="https://raw.githubusercontent.com/klaasnicolaas/action-pr-labels/main/.github/assets/icon.svg" width="96">
+  </picture>
+</p>
 
-[![GitHub Release][releases-shield]][releases]
-![Project Stage][project-stage-shield]
-![Project Maintenance][maintenance-shield]
-[![License][license-shield]](LICENSE)
+<p align="center">
+  <strong>Keep pull requests consistently labeled before they merge.</strong>
+</p>
 
-[![Test Status][test-shield]][test-url]
-[![Code Coverage][codecov-shield]][codecov-url]
+<p align="center">
+  <a href="https://github.com/klaasnicolaas/action-pr-labels/actions/workflows/tests.yaml"><img src="https://github.com/klaasnicolaas/action-pr-labels/actions/workflows/tests.yaml/badge.svg" alt="Tests"></a>
+  <a href="https://codecov.io/gh/klaasnicolaas/action-pr-labels"><img src="https://codecov.io/gh/klaasnicolaas/action-pr-labels/branch/main/graph/badge.svg?token=ZWRTTOMS93" alt="Coverage"></a>
+  <a href="https://github.com/klaasnicolaas/action-pr-labels/releases"><img src="https://img.shields.io/github/v/release/klaasnicolaas/action-pr-labels" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/klaasnicolaas/action-pr-labels" alt="License"></a>
+</p>
 
-This GitHub Action is created to validate pull requests based on predefined labels.
+<p align="center">
+  <a href="https://github.com/klaasnicolaas/action-pr-labels/releases/latest"><strong>Latest release</strong></a>
+  &middot;
+  <a href="#example-workflow"><strong>Usage</strong></a>
+  &middot;
+  <a href="#inputs"><strong>Inputs</strong></a>
+  &middot;
+  <a href="CONTRIBUTING.md"><strong>Contributing</strong></a>
+</p>
 
-By specifying valid and/or invalid labels, this action ensures that pull requests are labeled consistently according to your project standards. If a pull request does not contain at least one valid label or if it contains any invalid labels, the action will fail and providing clear error messages.
+<p align="center">
+  Validate required and forbidden labels, match wildcard patterns and optionally publish reusable feedback on the pull request.
+</p>
 
-### Features
+# PR Label Checker
+
+Define valid and invalid labels to enforce your project's pull request
+conventions. The action fails with clear feedback when required labels are
+missing or forbidden labels are present.
+
+## Features
 
 - **Label Validation**: Ensures that a pull request has at least one valid label and no invalid labels.
 - **Detailed Error Messages**: Provides clear error messages when no valid labels are found or when invalid labels are detected, causing the action to fail.
@@ -188,14 +211,3 @@ Thank you for being involved! :heart_eyes:
 ## License
 
 Distributed under the **Apache License 2.0** license. See [`LICENSE`](LICENSE) for more information.
-
-<!-- LINKS -->
-[codecov-shield]: https://codecov.io/gh/klaasnicolaas/action-pr-labels/branch/main/graph/badge.svg?token=ZWRTTOMS93
-[codecov-url]: https://codecov.io/gh/klaasnicolaas/action-pr-labels
-[license-shield]: https://img.shields.io/github/license/klaasnicolaas/action-pr-labels.svg
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2026.svg
-[project-stage-shield]: https://img.shields.io/badge/project%20stage-production%20ready-brightgreen.svg
-[releases-shield]: https://img.shields.io/github/release/klaasnicolaas/action-pr-labels.svg
-[releases]: https://github.com/klaasnicolaas/action-pr-labels/releases
-[test-shield]: https://github.com/klaasnicolaas/action-pr-labels/actions/workflows/tests.yaml/badge.svg
-[test-url]: https://github.com/klaasnicolaas/action-pr-labels/actions/workflows/tests.yaml
