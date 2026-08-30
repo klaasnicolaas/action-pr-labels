@@ -6,6 +6,10 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: release-version-tags
+  cancel-in-progress: true
+
 jobs:
   validate-release:
     name: 🔍 Validate release bundle
@@ -31,7 +35,13 @@ jobs:
       - name: 🏗 Build release bundle
         run: npm run build
       - name: 🔍 Verify committed release bundle
-        run: git diff --exit-code -- dist/
+        shell: bash
+        run: |
+          if [[ -n "$(git status --short --untracked-files=all -- dist/)" ]]; then
+            git status --short --untracked-files=all -- dist/
+            git diff -- dist/
+            exit 1
+          fi
 
   update-version-tags:
     name: 🏷️ Update moving Action tags

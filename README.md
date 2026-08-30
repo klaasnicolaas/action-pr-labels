@@ -1,6 +1,6 @@
 <p align="center">
   <picture>
-    <img alt="PR Label Checker" src="https://raw.githubusercontent.com/klaasnicolaas/action-pr-labels/main/.github/assets/icon.svg" width="96">
+    <img alt="PR Label Checker" src=".github/assets/icon.svg" width="96">
   </picture>
 </p>
 
