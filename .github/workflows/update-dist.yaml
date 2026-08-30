@@ -1,0 +1,84 @@
+---
+name: Update distribution
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: update-distribution
+  cancel-in-progress: true
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+env:
+  DIST_BRANCH: chore/update-dist
+
+jobs:
+  update:
+    name: 📦 Update distribution bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out triggering ref
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: 🏗 Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: 🏗 Install dependencies
+        env:
+          HUSKY: 0
+        run: npm ci
+      - name: 🚀 Run tests
+        run: npm test
+      - name: 🔍 Check formatting
+        run: npm run format:check
+      - name: 🔍 Check types
+        run: npm run typing:check
+      - name: 📦 Build distribution bundle
+        run: npm run build
+      - name: Create or update distribution pull request
+        id: dist-pr
+        uses: peter-evans/create-pull-request@v8.1.1
+        with:
+          add-paths: dist/**
+          branch: ${{ env.DIST_BRANCH }}
+          commit-message: 'chore: update distribution bundle'
+          title: 'chore: update distribution bundle'
+          body: >-
+            Keep the committed distribution bundle in sync with the current
+            default branch. This pull request is updated automatically and can
+            be merged when preparing a release.
+          labels: maintenance
+      - name: Start pull request checks
+        if: >-
+          steps.dist-pr.outputs.pull-request-operation == 'created' ||
+          steps.dist-pr.outputs.pull-request-operation == 'updated'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.dist-pr.outputs.pull-request-number }}
+        run: |
+          gh workflow run tests.yaml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$DIST_BRANCH"
+          gh workflow run linting.yaml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$DIST_BRANCH"
+          gh workflow run typing.yaml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$DIST_BRANCH"
+          gh workflow run pr-labels.yaml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$DIST_BRANCH" \
+            --field pr_number="$PR_NUMBER"

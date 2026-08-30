@@ -23,14 +23,6 @@ jobs:
         run: npm ci
       - name: 🏗 Build action
         run: npm run build
-      - name: 🔍 Verify committed build output
-        shell: bash
-        run: |
-          if [[ -n "$(git status --short --untracked-files=all -- dist/)" ]]; then
-            git status --short --untracked-files=all -- dist/
-            git diff -- dist/
-            exit 1
-          fi
 
   vitest:
     name: Node.js ${{ matrix.node-version }}
