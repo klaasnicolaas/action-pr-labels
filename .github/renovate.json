@@ -25,7 +25,7 @@
       "automerge": true
     },
     {
-      "matchPackageNames": ["vitest", "@vitest/coverage-v8"],
+      "matchPackageNames": ["vitest", "@vitest/**"],
       "groupName": "vitest",
       "automerge": false
     }
