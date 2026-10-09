@@ -24,7 +24,7 @@ jobs:
       - name: 🔍 Verify packaged entry point
         run: git ls-files --error-unmatch dist/index.cjs
       - name: 🏗 Set up Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: .node-version
           cache: npm
